@@ -62,10 +62,46 @@ python modbus_service.py
 python test_service.py
 ```
 
+Using the System Architecture (Multi-PLC Management)
+- The `system/` folder contains a scalable architecture for managing multiple PLCs:
+  - `plc_manager.py` — Central manager coordinating multiple PLCs
+  - `plc_device.py` — Individual PLC device abstraction
+  - `config.py` — Centralized PLC configuration
+  - `events.py` — Event system for real-time notifications
+  - `constants.py` — Shared constants (coil/register addresses)
+
+System CLI Examples
+- The new `system_cli.py` provides a modern interface for all operations:
+
+```bash
+# Connect to all PLCs
+python system_cli.py connect
+
+# Show system status
+python system_cli.py status
+
+# Read/write single PLC
+python system_cli.py read-coil HORNER_1 6000
+python system_cli.py write-coil HORNER_1 6000 true
+python system_cli.py read-register HORNER_1 3000
+python system_cli.py write-register HORNER_1 3000 123
+
+# Synchronized reads across all PLCs
+python system_cli.py sync-read-coil 6000
+python system_cli.py sync-read-register 3000
+
+# Full demo
+python system_cli.py demo --debug
+
+# Show command help
+python system_cli.py --help
+```
+
 Development notes
 - Use a virtual environment and keep dependencies in a `requirements.txt` for reproducible installs.
 - Keep the generated UI file (`horner_gui_ui.py`) in sync with `horner_gui.ui` if you edit the UI.
-- If you want me to add a `requirements.txt`, example tests, or a more detailed developer guide, tell me which parts you'd like and I will add them.
+- The new `system/` architecture supports easy scaling to multiple PLCs without code duplication.
+- Events are emitted for all operations, enabling real-time monitoring and logging.
 
 Contact
 - If something doesn't run, open an issue in this repo or contact the project maintainer.
