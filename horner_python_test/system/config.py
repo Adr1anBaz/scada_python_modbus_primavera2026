@@ -54,25 +54,32 @@ class PLCConfigManager:
 def create_default_config() -> PLCConfigManager:
     """
     Crea la configuración por defecto.
-    Actualmente solo tiene el PLC de la escuela.
+    3 PLCs Horner en la red 192.168.3.x
     """
     config = PLCConfigManager()
-    
-    # PLC actual de desarrollo
+
     config.register_plc(PLCConfig(
         id="HORNER_1",
-        host="192.168.3.12",
+        host="192.168.3.131",
         port=502,
         timeout=3,
-        name="Horner XL4 - Escuela"
+        name="Horner XL4 - SALIDA"
     ))
-    
-    # Aquí se pueden agregar más PLCs en el futuro:
-    # config.register_plc(PLCConfig(
-    #     id="HORNER_2",
-    #     host="192.168.3.13",
-    #     port=502,
-    #     name="Horner XL4 - Producción"
-    # ))
-    
+
+    config.register_plc(PLCConfig(
+        id="HORNER_2",
+        host="192.168.3.132",
+        port=502,
+        timeout=3,
+        name="Horner XL4 - ENTRADA"
+    ))
+
+    config.register_plc(PLCConfig(
+        id="HORNER_3",
+        host="192.168.3.133",
+        port=502,
+        timeout=3,
+        name="Horner XL4 - CENTRAL"
+    ))
+
     return config
