@@ -60,6 +60,8 @@ class PLCManager(EventEmitter):
                      lambda address, value, plc_id=plc_config.id: self.emit("coil_read", plc_id=plc_id, address=address, value=value))
             device.on("coil_written",
                      lambda address, value, plc_id=plc_config.id: self.emit("coil_written", plc_id=plc_id, address=address, value=value))
+            device.on("input_read",
+                     lambda address, value, plc_id=plc_config.id: self.emit("input_read", plc_id=plc_id, address=address, value=value))
             device.on("register_read",
                      lambda address, value, plc_id=plc_config.id: self.emit("register_read", plc_id=plc_id, address=address, value=value))
             device.on("register_written",
@@ -142,6 +144,35 @@ class PLCManager(EventEmitter):
         
         return results
     
+    # =========================================================================
+    # OPERACIONES CON DISCRETE INPUTS (entradas físicas, solo lectura)
+    # =========================================================================
+
+    def read_input(self, plc_id: str, address: int) -> bool:
+        """Lee una entrada discreta en un PLC específico."""
+        return self.get_device(plc_id).read_input(address)
+
+    def read_input_from_all(self, address: int) -> Dict[str, bool]:
+        """
+        Lee la misma entrada discreta en todos los PLCs.
+
+        Args:
+            address: Dirección del input
+
+        Returns:
+            Dict con plc_id -> valor
+        """
+        results = {}
+
+        for plc_id, device in self.devices.items():
+            try:
+                results[plc_id] = device.read_input(address)
+            except Exception as e:
+                print(f"Error leyendo input {address} en {plc_id}: {e}")
+                results[plc_id] = None
+
+        return results
+
     # =========================================================================
     # OPERACIONES CON REGISTROS (acceso directo desde el manager)
     # =========================================================================

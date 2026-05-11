@@ -18,6 +18,7 @@ class EventType(Enum):
     # Lectura/Escritura
     COIL_READ = "coil_read"
     COIL_WRITTEN = "coil_written"
+    INPUT_READ = "input_read"
     REGISTER_READ = "register_read"
     REGISTER_WRITTEN = "register_written"
 

@@ -44,6 +44,7 @@ class PLCDevice(EventEmitter):
         
         self.connected = False
         self._coil_cache = {}
+        self._input_cache = {}
         self._register_cache = {}
     
     def connect(self) -> bool:
@@ -171,6 +172,53 @@ class PLCDevice(EventEmitter):
             raise RuntimeError(f"Error escribiendo coil {address} en {self.plc_id}: {e}")
     
     # =========================================================================
+    # OPERACIONES CON DISCRETE INPUTS (Entradas físicas - solo lectura)
+    # =========================================================================
+
+    def read_input(self, address: int) -> bool:
+        """
+        Lee una entrada discreta (input físico del PLC).
+        Usa read_discrete_inputs de Modbus (función 02).
+
+        Args:
+            address: Dirección Modbus de la entrada (I1=0, I2=1, ...)
+
+        Returns:
+            Valor booleano leído
+
+        Raises:
+            RuntimeError: Si hay error en la lectura
+        """
+        if not self.connected:
+            raise RuntimeError(f"PLC {self.plc_id} no está conectado")
+
+        try:
+            result = self.client.read_discrete_inputs(address, count=1)
+
+            if result is None or result.isError():
+                raise RuntimeError(f"Error al leer input {address}: {result}")
+
+            value = bool(result.bits[0])
+            self._input_cache[address] = value
+
+            self.emit(
+                EventType.INPUT_READ,
+                plc_id=self.plc_id,
+                address=address,
+                value=value
+            )
+
+            return value
+
+        except Exception as e:
+            self.emit(
+                EventType.PLC_ERROR,
+                plc_id=self.plc_id,
+                error=str(e)
+            )
+            raise RuntimeError(f"Error leyendo input {address} en {self.plc_id}: {e}")
+
+    # =========================================================================
     # OPERACIONES CON REGISTROS (Valores de 16 bits)
     # =========================================================================
     
@@ -260,14 +308,19 @@ class PLCDevice(EventEmitter):
     def get_cached_coil(self, address: int) -> Optional[bool]:
         """Obtiene el valor cacheado de una coil sin consultar el PLC."""
         return self._coil_cache.get(address)
-    
+
+    def get_cached_input(self, address: int) -> Optional[bool]:
+        """Obtiene el valor cacheado de un input sin consultar el PLC."""
+        return self._input_cache.get(address)
+
     def get_cached_register(self, address: int) -> Optional[int]:
         """Obtiene el valor cacheado de un registro sin consultar el PLC."""
         return self._register_cache.get(address)
-    
+
     def clear_cache(self) -> None:
         """Limpia la caché local."""
         self._coil_cache.clear()
+        self._input_cache.clear()
         self._register_cache.clear()
     
     def __repr__(self) -> str:
