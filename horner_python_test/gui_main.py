@@ -481,7 +481,7 @@ class CentralTab(QWidget):
         self.led_recibido = LedIndicator()
         pilotos_layout.addWidget(self.led_recibido)
 
-        pilotos_layout.addWidget(QLabel("Listo:"))
+        pilotos_layout.addWidget(QLabel("Listo para empezar:"))
         self.led_listo = LedIndicator()
         pilotos_layout.addWidget(self.led_listo)
 
