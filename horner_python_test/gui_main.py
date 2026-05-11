@@ -366,6 +366,246 @@ class EntradaTab(QWidget):
         )
 
 
+class CentralTab(QWidget):
+    """Tab para el PLC Central (HORNER_3 - 192.168.3.133). Banda rotatoria."""
+
+    PLC_ID = "HORNER_3"
+
+    def __init__(self, manager: PLCManager, log_callback):
+        super().__init__()
+        self.manager = manager
+        self.log = log_callback
+        self.connected = False
+        self.setup_ui()
+
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+
+        # --- Fila superior: Control + Pilotos ---
+        top_row = QHBoxLayout()
+
+        grp_control = QGroupBox("Control")
+        ctrl_layout = QHBoxLayout(grp_control)
+
+        self.btn_stop = QPushButton("⏹ STOP")
+        self.btn_stop.setStyleSheet(self._btn_style("#F44336"))
+        self.btn_stop.clicked.connect(self.on_stop)
+        ctrl_layout.addWidget(self.btn_stop)
+
+        self.btn_llego_caja = QPushButton("Llegó caja")
+        self.btn_llego_caja.setStyleSheet(self._btn_style("#795548"))
+        self.btn_llego_caja.clicked.connect(self.on_llego_caja)
+        ctrl_layout.addWidget(self.btn_llego_caja)
+
+        self.btn_recibio_b3 = QPushButton("Recibió B3")
+        self.btn_recibio_b3.setStyleSheet(self._btn_style("#795548"))
+        self.btn_recibio_b3.clicked.connect(self.on_recibio_b3)
+        ctrl_layout.addWidget(self.btn_recibio_b3)
+
+        self.btn_ur3_fin = QPushButton("UR3 Fin")
+        self.btn_ur3_fin.setStyleSheet(self._btn_style("#795548"))
+        self.btn_ur3_fin.clicked.connect(self.on_ur3_fin)
+        ctrl_layout.addWidget(self.btn_ur3_fin)
+
+        top_row.addWidget(grp_control)
+
+        grp_pilotos = QGroupBox("Pilotos de Estado")
+        pilotos_layout = QHBoxLayout(grp_pilotos)
+
+        pilotos_layout.addWidget(QLabel("Recibido:"))
+        self.led_recibido = LedIndicator()
+        pilotos_layout.addWidget(self.led_recibido)
+
+        pilotos_layout.addWidget(QLabel("Listo:"))
+        self.led_listo = LedIndicator()
+        pilotos_layout.addWidget(self.led_listo)
+
+        top_row.addWidget(grp_pilotos)
+        layout.addLayout(top_row)
+
+        # --- Fila media: Rotador + Banda ---
+        mid_row = QHBoxLayout()
+
+        grp_rotador = QGroupBox("Rotador")
+        rot_layout = QHBoxLayout(grp_rotador)
+
+        self.btn_rot_anti = QPushButton("↺ Anti")
+        self.btn_rot_anti.setStyleSheet(self._btn_style("#2196F3"))
+        self.btn_rot_anti.clicked.connect(self.on_rotador_anti)
+        rot_layout.addWidget(self.btn_rot_anti)
+
+        self.btn_rot_stop = QPushButton("⏹")
+        self.btn_rot_stop.setStyleSheet(self._btn_style("#607D8B"))
+        self.btn_rot_stop.clicked.connect(self.on_rotador_stop)
+        rot_layout.addWidget(self.btn_rot_stop)
+
+        self.btn_rot_hora = QPushButton("↻ Hora")
+        self.btn_rot_hora.setStyleSheet(self._btn_style("#2196F3"))
+        self.btn_rot_hora.clicked.connect(self.on_rotador_hora)
+        rot_layout.addWidget(self.btn_rot_hora)
+
+        mid_row.addWidget(grp_rotador)
+
+        grp_banda = QGroupBox("Banda")
+        banda_layout = QHBoxLayout(grp_banda)
+
+        self.btn_banda_atras = QPushButton("◀ Atrás")
+        self.btn_banda_atras.setStyleSheet(self._btn_style("#2196F3"))
+        self.btn_banda_atras.clicked.connect(self.on_banda_atras)
+        banda_layout.addWidget(self.btn_banda_atras)
+
+        self.btn_banda_stop = QPushButton("⏹")
+        self.btn_banda_stop.setStyleSheet(self._btn_style("#607D8B"))
+        self.btn_banda_stop.clicked.connect(self.on_banda_stop)
+        banda_layout.addWidget(self.btn_banda_stop)
+
+        self.btn_banda_adelante = QPushButton("▶ Adelante")
+        self.btn_banda_adelante.setStyleSheet(self._btn_style("#2196F3"))
+        self.btn_banda_adelante.clicked.connect(self.on_banda_adelante)
+        banda_layout.addWidget(self.btn_banda_adelante)
+
+        mid_row.addWidget(grp_banda)
+        layout.addLayout(mid_row)
+
+        # --- Fila inferior: Torreta + Diagnóstico ---
+        bot_row = QHBoxLayout()
+
+        grp_torreta = QGroupBox("Torreta")
+        torreta_layout = QHBoxLayout(grp_torreta)
+
+        self.btn_torr_verde = QPushButton("🟢")
+        self.btn_torr_verde.setStyleSheet(self._btn_style("#4CAF50"))
+        self.btn_torr_verde.clicked.connect(self.on_torreta_verde)
+        torreta_layout.addWidget(self.btn_torr_verde)
+
+        self.btn_torr_amarillo = QPushButton("🟡")
+        self.btn_torr_amarillo.setStyleSheet(self._btn_style("#FFC107"))
+        self.btn_torr_amarillo.clicked.connect(self.on_torreta_amarillo)
+        torreta_layout.addWidget(self.btn_torr_amarillo)
+
+        self.btn_torr_rojo = QPushButton("🔴")
+        self.btn_torr_rojo.setStyleSheet(self._btn_style("#F44336"))
+        self.btn_torr_rojo.clicked.connect(self.on_torreta_rojo)
+        torreta_layout.addWidget(self.btn_torr_rojo)
+
+        bot_row.addWidget(grp_torreta)
+
+        grp_diag = QGroupBox("Diagnóstico (lectura)")
+        diag_layout = QGridLayout(grp_diag)
+
+        diag_layout.addWidget(QLabel("Sen. Entrada:"), 0, 0)
+        self.led_diag_entrada = LedIndicator()
+        diag_layout.addWidget(self.led_diag_entrada, 0, 1)
+
+        diag_layout.addWidget(QLabel("Sen. Salida:"), 0, 2)
+        self.led_diag_salida = LedIndicator()
+        diag_layout.addWidget(self.led_diag_salida, 0, 3)
+
+        diag_layout.addWidget(QLabel("Sen. Giro:"), 0, 4)
+        self.led_diag_giro = LedIndicator()
+        diag_layout.addWidget(self.led_diag_giro, 0, 5)
+
+        diag_layout.addWidget(QLabel("Btn Verde:"), 1, 0)
+        self.led_diag_btn_verde = LedIndicator()
+        diag_layout.addWidget(self.led_diag_btn_verde, 1, 1)
+
+        diag_layout.addWidget(QLabel("Btn Rojo:"), 1, 2)
+        self.led_diag_btn_rojo = LedIndicator()
+        diag_layout.addWidget(self.led_diag_btn_rojo, 1, 3)
+
+        diag_layout.addWidget(QLabel("Btn Paro:"), 1, 4)
+        self.led_diag_btn_paro = LedIndicator()
+        diag_layout.addWidget(self.led_diag_btn_paro, 1, 5)
+
+        bot_row.addWidget(grp_diag)
+        layout.addLayout(bot_row)
+
+    # --- Acciones de botones ---
+
+    def on_stop(self):
+        self._write_coil(CENTRAL_STOP, True, "STOP activado")
+
+    def on_llego_caja(self):
+        self._write_coil(CENTRAL_LLEGO_CAJA, True, "Señal: llegó caja")
+
+    def on_recibio_b3(self):
+        self._write_coil(CENTRAL_RECIBIO_BANDA3, True, "Señal: recibió banda 3")
+
+    def on_ur3_fin(self):
+        self._write_coil(CENTRAL_UR3_FIN, True, "Señal: UR3 fin")
+
+    def on_rotador_anti(self):
+        self._write_coil(CENTRAL_ROTADOR_ANTIHORARIO, True, "Rotador ↺ antihorario")
+
+    def on_rotador_stop(self):
+        self._write_coil(CENTRAL_ROTADOR_STOP, True, "Rotador detenido")
+
+    def on_rotador_hora(self):
+        self._write_coil(CENTRAL_ROTADOR_HORARIO, True, "Rotador ↻ horario")
+
+    def on_banda_atras(self):
+        self._write_coil(CENTRAL_BANDA_ATRAS, True, "Banda ◀ atrás")
+
+    def on_banda_stop(self):
+        self._write_coil(CENTRAL_BANDA_STOP, True, "Banda detenida")
+
+    def on_banda_adelante(self):
+        self._write_coil(CENTRAL_BANDA_ADELANTE, True, "Banda ▶ adelante")
+
+    def on_torreta_verde(self):
+        self._write_coil(CENTRAL_TORRETA_VERDE, True, "Torreta verde ON")
+
+    def on_torreta_amarillo(self):
+        self._write_coil(CENTRAL_TORRETA_AMARILLO, True, "Torreta amarillo ON")
+
+    def on_torreta_rojo(self):
+        self._write_coil(CENTRAL_TORRETA_ROJO, True, "Torreta rojo ON")
+
+    # --- Polling de estado ---
+
+    def refresh(self):
+        """Llamado por el timer para actualizar indicadores."""
+        if not self.connected:
+            return
+
+        try:
+            self.led_recibido.update_state(
+                self.manager.read_coil(self.PLC_ID, CENTRAL_PILOTO_RECIBIDO))
+            self.led_listo.update_state(
+                self.manager.read_coil(self.PLC_ID, CENTRAL_PILOTO_LISTO))
+
+            self.led_diag_entrada.update_state(
+                self.manager.read_coil(self.PLC_ID, CENTRAL_PILOTO_SENSOR_ENTRADA))
+            self.led_diag_salida.update_state(
+                self.manager.read_coil(self.PLC_ID, CENTRAL_PILOTO_SENSOR_SALIDA))
+            self.led_diag_giro.update_state(
+                self.manager.read_coil(self.PLC_ID, CENTRAL_PILOTO_SENSOR_GIRO))
+            self.led_diag_btn_verde.update_state(
+                self.manager.read_coil(self.PLC_ID, CENTRAL_PILOTO_BOTON_VERDE))
+            self.led_diag_btn_rojo.update_state(
+                self.manager.read_coil(self.PLC_ID, CENTRAL_PILOTO_BOTON_ROJO))
+            self.led_diag_btn_paro.update_state(
+                self.manager.read_coil(self.PLC_ID, CENTRAL_PILOTO_BOTON_PARO))
+
+        except Exception as e:
+            self.log(f"[CENTRAL] Error en refresh: {e}")
+
+    # --- Helpers ---
+
+    def _write_coil(self, address, value, msg):
+        try:
+            self.manager.write_coil(self.PLC_ID, address, value)
+            self.log(f"[CENTRAL] {msg}")
+        except Exception as e:
+            self.log(f"[CENTRAL] Error: {e}")
+
+    def _btn_style(self, color):
+        return (
+            f"background-color: {color}; color: white; "
+            f"font-size: 12px; padding: 8px 12px; border-radius: 4px;"
+        )
+
+
 class MainWindow(QMainWindow):
     """Ventana principal del SCADA."""
 
@@ -396,8 +636,9 @@ class MainWindow(QMainWindow):
         # Tabs
         self.tabs = QTabWidget()
         self.tab_entrada = EntradaTab(self.manager, self.log_message)
+        self.tab_central = CentralTab(self.manager, self.log_message)
         self.tabs.addTab(self.tab_entrada, "Entrada (HORNER_2)")
-        self.tabs.addTab(QWidget(), "Central (HORNER_3)")
+        self.tabs.addTab(self.tab_central, "Central (HORNER_3)")
         self.tabs.addTab(QWidget(), "Salida (HORNER_1)")
         main_layout.addWidget(self.tabs)
 
@@ -426,6 +667,7 @@ class MainWindow(QMainWindow):
                 total = len(results)
 
                 self.tab_entrada.connected = results.get("HORNER_2", False)
+                self.tab_central.connected = results.get("HORNER_3", False)
 
                 if connected_count > 0:
                     self.lbl_status.setText(f"Conectado: {connected_count}/{total}")
@@ -447,6 +689,7 @@ class MainWindow(QMainWindow):
             self.timer.stop()
             self.manager.shutdown()
             self.tab_entrada.connected = False
+            self.tab_central.connected = False
             self.lbl_status.setText("Desconectado")
             self.lbl_status.setStyleSheet("color: #F44336;")
             self.btn_connect.setText("Conectar")
@@ -454,6 +697,7 @@ class MainWindow(QMainWindow):
 
     def refresh_all(self):
         self.tab_entrada.refresh()
+        self.tab_central.refresh()
 
     def log_message(self, msg):
         self.txt_log.append(msg)
