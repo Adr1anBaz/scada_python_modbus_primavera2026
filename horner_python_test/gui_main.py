@@ -606,6 +606,263 @@ class CentralTab(QWidget):
         )
 
 
+class SalidaTab(QWidget):
+    """Tab para el PLC de Salida (HORNER_1 - 192.168.3.131). Banda de salida."""
+
+    PLC_ID = "HORNER_1"
+
+    def __init__(self, manager: PLCManager, log_callback):
+        super().__init__()
+        self.manager = manager
+        self.log = log_callback
+        self.connected = False
+        self.setup_ui()
+
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+
+        # --- Fila superior: Control + LEDs ---
+        top_row = QHBoxLayout()
+
+        grp_control = QGroupBox("Control")
+        ctrl_layout = QHBoxLayout(grp_control)
+
+        self.btn_init = QPushButton("▶ Init Proceso")
+        self.btn_init.setStyleSheet(self._btn_style("#4CAF50"))
+        self.btn_init.clicked.connect(self.on_init_proceso)
+        ctrl_layout.addWidget(self.btn_init)
+
+        self.btn_stop = QPushButton("⏹ STOP")
+        self.btn_stop.setStyleSheet(self._btn_style("#F44336"))
+        self.btn_stop.clicked.connect(self.on_stop)
+        ctrl_layout.addWidget(self.btn_stop)
+
+        top_row.addWidget(grp_control)
+
+        grp_leds = QGroupBox("LEDs")
+        leds_layout = QHBoxLayout(grp_leds)
+
+        self.btn_led_verde = QPushButton("🟢 Verde")
+        self.btn_led_verde.setStyleSheet(self._btn_style("#4CAF50"))
+        self.btn_led_verde.clicked.connect(self.on_led_verde)
+        leds_layout.addWidget(self.btn_led_verde)
+
+        self.btn_led_amarillo = QPushButton("🟡 Amarillo")
+        self.btn_led_amarillo.setStyleSheet(self._btn_style("#FFC107"))
+        self.btn_led_amarillo.clicked.connect(self.on_led_amarillo)
+        leds_layout.addWidget(self.btn_led_amarillo)
+
+        self.btn_led_rojo = QPushButton("🔴 Rojo")
+        self.btn_led_rojo.setStyleSheet(self._btn_style("#F44336"))
+        self.btn_led_rojo.clicked.connect(self.on_led_rojo)
+        leds_layout.addWidget(self.btn_led_rojo)
+
+        top_row.addWidget(grp_leds)
+        layout.addLayout(top_row)
+
+        # --- Fila media: Banda + Plumas ---
+        mid_row = QHBoxLayout()
+
+        grp_banda = QGroupBox("Banda")
+        banda_layout = QVBoxLayout(grp_banda)
+
+        banda_btns = QHBoxLayout()
+        self.btn_banda_izq = QPushButton("◀ Izq")
+        self.btn_banda_izq.setStyleSheet(self._btn_style("#2196F3"))
+        self.btn_banda_izq.clicked.connect(self.on_banda_izq)
+        banda_btns.addWidget(self.btn_banda_izq)
+
+        self.btn_banda_off = QPushButton("⏹ Off")
+        self.btn_banda_off.setStyleSheet(self._btn_style("#607D8B"))
+        self.btn_banda_off.clicked.connect(self.on_banda_off)
+        banda_btns.addWidget(self.btn_banda_off)
+
+        self.btn_banda_der = QPushButton("▶ Der")
+        self.btn_banda_der.setStyleSheet(self._btn_style("#2196F3"))
+        self.btn_banda_der.clicked.connect(self.on_banda_der)
+        banda_btns.addWidget(self.btn_banda_der)
+
+        banda_layout.addLayout(banda_btns)
+
+        # VFD
+        vfd_row = QHBoxLayout()
+        vfd_row.addWidget(QLabel("VFD Hz:"))
+        self.input_vfd = QLineEdit()
+        self.input_vfd.setPlaceholderText("Frecuencia")
+        self.input_vfd.setFixedWidth(80)
+        vfd_row.addWidget(self.input_vfd)
+
+        self.btn_vfd_escribir = QPushButton("Escribir")
+        self.btn_vfd_escribir.clicked.connect(self.on_vfd_escribir)
+        vfd_row.addWidget(self.btn_vfd_escribir)
+
+        vfd_row.addWidget(QLabel("Actual:"))
+        self.lbl_vfd_actual = QLabel("--- Hz")
+        self.lbl_vfd_actual.setFont(QFont("Arial", 10, QFont.Bold))
+        vfd_row.addWidget(self.lbl_vfd_actual)
+
+        vfd_row.addWidget(QLabel("Estado:"))
+        self.lbl_maquina_estados = QLabel("---")
+        self.lbl_maquina_estados.setFont(QFont("Arial", 10, QFont.Bold))
+        vfd_row.addWidget(self.lbl_maquina_estados)
+        vfd_row.addStretch()
+
+        banda_layout.addLayout(vfd_row)
+        mid_row.addWidget(grp_banda)
+
+        grp_plumas = QGroupBox("Plumas")
+        plumas_layout = QGridLayout(grp_plumas)
+
+        plumas_layout.addWidget(QLabel("Entrada:"), 0, 0)
+        self.btn_pluma_ent_abrir = QPushButton("Abrir")
+        self.btn_pluma_ent_abrir.clicked.connect(self.on_pluma_entrada_abrir)
+        plumas_layout.addWidget(self.btn_pluma_ent_abrir, 0, 1)
+
+        self.btn_pluma_ent_cerrar = QPushButton("Cerrar")
+        self.btn_pluma_ent_cerrar.clicked.connect(self.on_pluma_entrada_cerrar)
+        plumas_layout.addWidget(self.btn_pluma_ent_cerrar, 0, 2)
+
+        plumas_layout.addWidget(QLabel("Salida:"), 1, 0)
+        self.btn_pluma_sal_abrir = QPushButton("Abrir")
+        self.btn_pluma_sal_abrir.clicked.connect(self.on_pluma_salida_abrir)
+        plumas_layout.addWidget(self.btn_pluma_sal_abrir, 1, 1)
+
+        self.btn_pluma_sal_cerrar = QPushButton("Cerrar")
+        self.btn_pluma_sal_cerrar.clicked.connect(self.on_pluma_salida_cerrar)
+        plumas_layout.addWidget(self.btn_pluma_sal_cerrar, 1, 2)
+
+        mid_row.addWidget(grp_plumas)
+        layout.addLayout(mid_row)
+
+        # --- Fila inferior: Sensores ---
+        grp_sensores = QGroupBox("Sensores / Entradas Físicas")
+        sensores_layout = QHBoxLayout(grp_sensores)
+
+        sensores_layout.addWidget(QLabel("I1 NA:"))
+        self.led_boton_na = LedIndicator()
+        sensores_layout.addWidget(self.led_boton_na)
+
+        sensores_layout.addWidget(QLabel("I2 NC:"))
+        self.led_boton_nc = LedIndicator()
+        sensores_layout.addWidget(self.led_boton_nc)
+
+        sensores_layout.addWidget(QLabel("I3 Emerg:"))
+        self.led_emergencia = LedIndicator()
+        sensores_layout.addWidget(self.led_emergencia)
+
+        sensores_layout.addWidget(QLabel("I4 Salida:"))
+        self.led_sensor_salida = LedIndicator()
+        sensores_layout.addWidget(self.led_sensor_salida)
+
+        sensores_layout.addWidget(QLabel("I5 Entrada:"))
+        self.led_sensor_entrada = LedIndicator()
+        sensores_layout.addWidget(self.led_sensor_entrada)
+
+        layout.addWidget(grp_sensores)
+
+    # --- Acciones de botones ---
+
+    def on_init_proceso(self):
+        self._write_bit(SALIDA_BIT_INIT_PROCESO, True, "Init proceso (Estado 0→1)")
+
+    def on_stop(self):
+        self._write_bit(SALIDA_BIT_STOP, True, "STOP activado")
+
+    def on_led_verde(self):
+        self._write_bit(SALIDA_BIT_LED_VERDE, True, "LED verde ON")
+
+    def on_led_amarillo(self):
+        self._write_bit(SALIDA_BIT_LED_AMARILLO, True, "LED amarillo ON")
+
+    def on_led_rojo(self):
+        self._write_bit(SALIDA_BIT_LED_ROJO, True, "LED rojo ON")
+
+    def on_banda_izq(self):
+        self._write_register(SALIDA_SWITCH_BANDA, 5376, "Banda ◀ izquierda")
+
+    def on_banda_off(self):
+        self._write_register(SALIDA_SWITCH_BANDA, 5377, "Banda detenida")
+
+    def on_banda_der(self):
+        self._write_register(SALIDA_SWITCH_BANDA, 5378, "Banda ▶ derecha")
+
+    def on_pluma_entrada_abrir(self):
+        self._write_bit(SALIDA_BIT_LED_VERDE, True, "Pluma entrada abierta")
+
+    def on_pluma_entrada_cerrar(self):
+        self._write_bit(SALIDA_BIT_PLUMA_ENTRADA_CERRAR, True, "Pluma entrada cerrada")
+
+    def on_pluma_salida_abrir(self):
+        self._write_bit(SALIDA_BIT_PLUMA_SALIDA_ABRIR, True, "Pluma salida abierta")
+
+    def on_pluma_salida_cerrar(self):
+        self._write_bit(SALIDA_BIT_PLUMA_SALIDA_CERRAR, True, "Pluma salida cerrada")
+
+    def on_vfd_escribir(self):
+        text = self.input_vfd.text().strip()
+        if not text:
+            return
+        try:
+            value = int(text)
+            self.manager.write_register(self.PLC_ID, SALIDA_VFD_ESCRIBIR, value)
+            self.log(f"[SALIDA] VFD frecuencia escrita: {value}")
+        except ValueError:
+            self.log("[SALIDA] Error: frecuencia debe ser un número entero")
+        except Exception as e:
+            self.log(f"[SALIDA] Error escribiendo VFD: {e}")
+
+    # --- Polling de estado ---
+
+    def refresh(self):
+        """Llamado por el timer para actualizar indicadores."""
+        if not self.connected:
+            return
+
+        try:
+            self.led_boton_na.update_state(
+                self.manager.read_input(self.PLC_ID, SALIDA_INPUT_BOTON_NA))
+            self.led_boton_nc.update_state(
+                self.manager.read_input(self.PLC_ID, SALIDA_INPUT_BOTON_NC))
+            self.led_emergencia.update_state(
+                self.manager.read_input(self.PLC_ID, SALIDA_INPUT_EMERGENCIA))
+            self.led_sensor_salida.update_state(
+                self.manager.read_input(self.PLC_ID, SALIDA_INPUT_SENSOR_SALIDA))
+            self.led_sensor_entrada.update_state(
+                self.manager.read_input(self.PLC_ID, SALIDA_INPUT_SENSOR_ENTRADA))
+
+            vfd_value = self.manager.read_register(self.PLC_ID, SALIDA_VFD_LEER)
+            self.lbl_vfd_actual.setText(f"{vfd_value} Hz")
+
+            estado = self.manager.read_register(self.PLC_ID, SALIDA_MAQUINA_ESTADOS)
+            self.lbl_maquina_estados.setText(str(estado))
+
+        except Exception as e:
+            self.log(f"[SALIDA] Error en refresh: {e}")
+
+    # --- Helpers ---
+
+    def _write_bit(self, bit, state, msg):
+        try:
+            self.manager.write_register_bit(
+                self.PLC_ID, SALIDA_REG_CONTROL, bit, state)
+            self.log(f"[SALIDA] {msg}")
+        except Exception as e:
+            self.log(f"[SALIDA] Error: {e}")
+
+    def _write_register(self, address, value, msg):
+        try:
+            self.manager.write_register(self.PLC_ID, address, value)
+            self.log(f"[SALIDA] {msg}")
+        except Exception as e:
+            self.log(f"[SALIDA] Error: {e}")
+
+    def _btn_style(self, color):
+        return (
+            f"background-color: {color}; color: white; "
+            f"font-size: 12px; padding: 8px 12px; border-radius: 4px;"
+        )
+
+
 class MainWindow(QMainWindow):
     """Ventana principal del SCADA."""
 
@@ -637,9 +894,10 @@ class MainWindow(QMainWindow):
         self.tabs = QTabWidget()
         self.tab_entrada = EntradaTab(self.manager, self.log_message)
         self.tab_central = CentralTab(self.manager, self.log_message)
+        self.tab_salida = SalidaTab(self.manager, self.log_message)
         self.tabs.addTab(self.tab_entrada, "Entrada (HORNER_2)")
         self.tabs.addTab(self.tab_central, "Central (HORNER_3)")
-        self.tabs.addTab(QWidget(), "Salida (HORNER_1)")
+        self.tabs.addTab(self.tab_salida, "Salida (HORNER_1)")
         main_layout.addWidget(self.tabs)
 
         # Log
@@ -668,6 +926,7 @@ class MainWindow(QMainWindow):
 
                 self.tab_entrada.connected = results.get("HORNER_2", False)
                 self.tab_central.connected = results.get("HORNER_3", False)
+                self.tab_salida.connected = results.get("HORNER_1", False)
 
                 if connected_count > 0:
                     self.lbl_status.setText(f"Conectado: {connected_count}/{total}")
@@ -690,6 +949,7 @@ class MainWindow(QMainWindow):
             self.manager.shutdown()
             self.tab_entrada.connected = False
             self.tab_central.connected = False
+            self.tab_salida.connected = False
             self.lbl_status.setText("Desconectado")
             self.lbl_status.setStyleSheet("color: #F44336;")
             self.btn_connect.setText("Conectar")
@@ -698,6 +958,7 @@ class MainWindow(QMainWindow):
     def refresh_all(self):
         self.tab_entrada.refresh()
         self.tab_central.refresh()
+        self.tab_salida.refresh()
 
     def log_message(self, msg):
         self.txt_log.append(msg)
