@@ -10,48 +10,152 @@ from PySide6.QtWidgets import (
     QGridLayout, QLineEdit, QTextEdit, QMessageBox
 )
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QPalette, QColor
 
 from system import PLCManager
+
+
+# =============================================================================
+# TEMA CLARO MINIMALISTA
+# =============================================================================
+
+STYLESHEET = """
+QMainWindow, QWidget {
+    background-color: #f8f9fa;
+    color: #212529;
+    font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+    font-size: 12px;
+}
+
+QTabWidget::pane {
+    border: 1px solid #dee2e6;
+    background-color: #ffffff;
+    border-radius: 6px;
+}
+
+QTabBar::tab {
+    background-color: #e9ecef;
+    color: #6c757d;
+    padding: 8px 24px;
+    margin-right: 2px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    font-weight: bold;
+}
+
+QTabBar::tab:selected {
+    background-color: #ffffff;
+    color: #212529;
+    border-bottom: 2px solid #4263eb;
+}
+
+QTabBar::tab:hover {
+    color: #212529;
+    background-color: #f1f3f5;
+}
+
+QGroupBox {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    margin-top: 14px;
+    padding: 12px 8px 8px 8px;
+    background-color: #ffffff;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 12px;
+    padding: 0 6px;
+    color: #4263eb;
+    font-weight: bold;
+}
+
+QPushButton {
+    background-color: #e9ecef;
+    color: #212529;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-weight: bold;
+    min-width: 60px;
+    min-height: 30px;
+}
+
+QPushButton:hover {
+    background-color: #dee2e6;
+    border-color: #4263eb;
+}
+
+QPushButton:pressed {
+    background-color: #4263eb;
+    color: #ffffff;
+}
+
+QLineEdit {
+    background-color: #ffffff;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 6px 8px;
+    color: #212529;
+}
+
+QLineEdit:focus {
+    border-color: #4263eb;
+}
+
+QTextEdit {
+    background-color: #f1f3f5;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    color: #495057;
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 10px;
+    padding: 4px;
+}
+
+QLabel {
+    color: #495057;
+    background-color: transparent;
+}
+"""
+
+
+def styled_btn(color, text_color="#ffffff"):
+    return (
+        f"background-color: {color}; color: {text_color}; "
+        f"border: none; border-radius: 6px; padding: 8px 18px; "
+        f"font-size: 12px; font-weight: bold; min-width: 60px; min-height: 30px;"
+    )
 from system.constants import *
 
 
 class LedIndicator(QLabel):
-    """Widget de LED virtual reutilizable."""
+    """LED virtual como circulo de color."""
 
     def __init__(self, text="OFF", parent=None):
-        super().__init__(text, parent)
+        super().__init__(parent)
         self.setAlignment(Qt.AlignCenter)
-        self.setFixedSize(70, 30)
-        self.setFont(QFont("Arial", 10, QFont.Bold))
+        self.setFixedSize(20, 20)
         self.set_off()
 
     def set_on(self, text="ON"):
-        self.setText(text)
         self.setStyleSheet(
-            "background-color: #4CAF50; color: white; "
-            "border-radius: 8px;"
+            "background-color: #2ecc71; border-radius: 10px; border: none;"
         )
 
     def set_off(self, text="OFF"):
-        self.setText(text)
         self.setStyleSheet(
-            "background-color: #F44336; color: white; "
-            "border-radius: 8px;"
+            "background-color: #e74c3c; border-radius: 10px; border: none;"
         )
 
     def set_warning(self, text="---"):
-        self.setText(text)
         self.setStyleSheet(
-            "background-color: #FF9800; color: white; "
-            "border-radius: 8px;"
+            "background-color: #f39c12; border-radius: 10px; border: none;"
         )
 
     def set_inactive(self, text="N/C"):
-        self.setText(text)
         self.setStyleSheet(
-            "background-color: #9E9E9E; color: white; "
-            "border-radius: 8px;"
+            "background-color: #bdc3c7; border-radius: 10px; border: none;"
         )
 
     def update_state(self, state: bool):
@@ -76,187 +180,151 @@ class EntradaTab(QWidget):
     def setup_ui(self):
         layout = QVBoxLayout(self)
 
-        # --- Fila superior: Control + Lámparas ---
+        # --- Fila 1: Control + Lamparas + Torreta ---
         top_row = QHBoxLayout()
 
-        # Control general
         grp_control = QGroupBox("Control")
         ctrl_layout = QHBoxLayout(grp_control)
-
-        self.btn_inicio = QPushButton("▶ INICIO")
-        self.btn_inicio.setStyleSheet(self._btn_style("#4CAF50"))
+        self.btn_inicio = QPushButton("INICIO")
+        self.btn_inicio.setStyleSheet(self._btn_style("#2f9e44"))
         self.btn_inicio.clicked.connect(self.on_inicio)
-
-        self.btn_stop = QPushButton("⏹ STOP")
-        self.btn_stop.setStyleSheet(self._btn_style("#F44336"))
+        self.btn_stop = QPushButton("STOP")
+        self.btn_stop.setStyleSheet(self._btn_style("#e03131"))
         self.btn_stop.clicked.connect(self.on_stop)
-
         ctrl_layout.addWidget(self.btn_inicio)
         ctrl_layout.addWidget(self.btn_stop)
         top_row.addWidget(grp_control)
 
-        # Lámparas
-        grp_lamparas = QGroupBox("Lámparas")
+        grp_lamparas = QGroupBox("Lamparas")
         lamp_layout = QHBoxLayout(grp_lamparas)
-
         lamp_layout.addWidget(QLabel("Verde:"))
         self.led_verde = LedIndicator()
         lamp_layout.addWidget(self.led_verde)
-
         lamp_layout.addWidget(QLabel("Amarilla:"))
         self.led_amarilla = LedIndicator()
         lamp_layout.addWidget(self.led_amarilla)
-
         lamp_layout.addWidget(QLabel("Roja:"))
         self.led_roja = LedIndicator()
         lamp_layout.addWidget(self.led_roja)
-
         top_row.addWidget(grp_lamparas)
+
+        grp_torreta = QGroupBox("Torreta")
+        torreta_layout = QHBoxLayout(grp_torreta)
+        self.btn_torr_verde = QPushButton("Verde")
+        self.btn_torr_verde.setStyleSheet(self._btn_style("#2f9e44"))
+        self.btn_torr_verde.clicked.connect(self.on_torreta_verde)
+        torreta_layout.addWidget(self.btn_torr_verde)
+        self.btn_torr_amarilla = QPushButton("Amarillo")
+        self.btn_torr_amarilla.setStyleSheet(self._btn_style("#f08c00"))
+        self.btn_torr_amarilla.clicked.connect(self.on_torreta_amarilla)
+        torreta_layout.addWidget(self.btn_torr_amarilla)
+        self.btn_torr_roja = QPushButton("Rojo")
+        self.btn_torr_roja.setStyleSheet(self._btn_style("#e03131"))
+        self.btn_torr_roja.clicked.connect(self.on_torreta_roja)
+        torreta_layout.addWidget(self.btn_torr_roja)
+        top_row.addWidget(grp_torreta)
+
         layout.addLayout(top_row)
 
-        # --- Fila media: Banda + Plumas ---
+        # --- Fila 2: Banda + Plumas ---
         mid_row = QHBoxLayout()
 
-        # Banda
         grp_banda = QGroupBox("Banda")
         banda_layout = QVBoxLayout(grp_banda)
-
         banda_btns = QHBoxLayout()
-        self.btn_banda_izq = QPushButton("◀ Izq")
-        self.btn_banda_izq.setStyleSheet(self._btn_style("#2196F3"))
+        self.btn_banda_izq = QPushButton("Izq")
+        self.btn_banda_izq.setStyleSheet(self._btn_style("#1c7ed6"))
         self.btn_banda_izq.clicked.connect(self.on_banda_izq)
-
-        self.btn_banda_stop = QPushButton("⏹ Stop")
-        self.btn_banda_stop.setStyleSheet(self._btn_style("#607D8B"))
+        self.btn_banda_stop = QPushButton("Stop")
+        self.btn_banda_stop.setStyleSheet(self._btn_style("#868e96"))
         self.btn_banda_stop.clicked.connect(self.on_banda_stop)
-
-        self.btn_banda_der = QPushButton("▶ Der")
-        self.btn_banda_der.setStyleSheet(self._btn_style("#2196F3"))
+        self.btn_banda_der = QPushButton("Der")
+        self.btn_banda_der.setStyleSheet(self._btn_style("#1c7ed6"))
         self.btn_banda_der.clicked.connect(self.on_banda_der)
-
         banda_btns.addWidget(self.btn_banda_izq)
         banda_btns.addWidget(self.btn_banda_stop)
         banda_btns.addWidget(self.btn_banda_der)
         banda_layout.addLayout(banda_btns)
 
-        # VFD
         vfd_row = QHBoxLayout()
         vfd_row.addWidget(QLabel("VFD Hz:"))
         self.input_vfd = QLineEdit()
         self.input_vfd.setPlaceholderText("Frecuencia")
         self.input_vfd.setFixedWidth(80)
         vfd_row.addWidget(self.input_vfd)
-
         self.btn_vfd_escribir = QPushButton("Escribir")
         self.btn_vfd_escribir.clicked.connect(self.on_vfd_escribir)
         vfd_row.addWidget(self.btn_vfd_escribir)
-
         vfd_row.addWidget(QLabel("Actual:"))
         self.lbl_vfd_actual = QLabel("--- Hz")
-        self.lbl_vfd_actual.setFont(QFont("Arial", 10, QFont.Bold))
+        self.lbl_vfd_actual.setFont(QFont("Segoe UI", 10, QFont.Bold))
         vfd_row.addWidget(self.lbl_vfd_actual)
         vfd_row.addStretch()
-
         banda_layout.addLayout(vfd_row)
         mid_row.addWidget(grp_banda)
 
-        # Plumas
         grp_plumas = QGroupBox("Plumas")
         plumas_layout = QGridLayout(grp_plumas)
-
         plumas_layout.addWidget(QLabel("Inicio:"), 0, 0)
-        self.btn_pluma_ini_sube = QPushButton("↑ Sube")
+        self.btn_pluma_ini_sube = QPushButton("Sube")
+        self.btn_pluma_ini_sube.setStyleSheet(self._btn_style("#1c7ed6"))
         self.btn_pluma_ini_sube.clicked.connect(self.on_pluma_ini_sube)
         plumas_layout.addWidget(self.btn_pluma_ini_sube, 0, 1)
-
-        self.btn_pluma_ini_baja = QPushButton("↓ Baja")
+        self.btn_pluma_ini_baja = QPushButton("Baja")
+        self.btn_pluma_ini_baja.setStyleSheet(self._btn_style("#1c7ed6"))
         self.btn_pluma_ini_baja.clicked.connect(self.on_pluma_ini_baja)
         plumas_layout.addWidget(self.btn_pluma_ini_baja, 0, 2)
-
         plumas_layout.addWidget(QLabel("Fin:"), 1, 0)
-        self.btn_pluma_fin = QPushButton("↕ Toggle")
+        self.btn_pluma_fin = QPushButton("Toggle")
+        self.btn_pluma_fin.setStyleSheet(self._btn_style("#1c7ed6"))
         self.btn_pluma_fin.clicked.connect(self.on_pluma_fin)
         plumas_layout.addWidget(self.btn_pluma_fin, 1, 1)
-
         mid_row.addWidget(grp_plumas)
+
         layout.addLayout(mid_row)
 
-        # --- Fila inferior: Torreta + Sensores ---
+        # --- Fila 3: Sensores + UR3 ---
         bot_row = QHBoxLayout()
 
-        # Torreta
-        grp_torreta = QGroupBox("Torreta Manual")
-        torreta_layout = QHBoxLayout(grp_torreta)
-
-        self.btn_torr_verde = QPushButton("🟢")
-        self.btn_torr_verde.setStyleSheet(self._btn_style("#4CAF50"))
-        self.btn_torr_verde.clicked.connect(self.on_torreta_verde)
-        torreta_layout.addWidget(self.btn_torr_verde)
-
-        self.btn_torr_amarilla = QPushButton("🟡")
-        self.btn_torr_amarilla.setStyleSheet(self._btn_style("#FFC107"))
-        self.btn_torr_amarilla.clicked.connect(self.on_torreta_amarilla)
-        torreta_layout.addWidget(self.btn_torr_amarilla)
-
-        self.btn_torr_roja = QPushButton("🔴")
-        self.btn_torr_roja.setStyleSheet(self._btn_style("#F44336"))
-        self.btn_torr_roja.clicked.connect(self.on_torreta_roja)
-        torreta_layout.addWidget(self.btn_torr_roja)
-
-        bot_row.addWidget(grp_torreta)
-
-        # Sensores
-        grp_sensores = QGroupBox("Sensores / Estado")
+        grp_sensores = QGroupBox("Sensores")
         sensores_layout = QGridLayout(grp_sensores)
-
         sensores_layout.addWidget(QLabel("I4 Entrada:"), 0, 0)
         self.led_sensor_entrada = LedIndicator()
         sensores_layout.addWidget(self.led_sensor_entrada, 0, 1)
-
         sensores_layout.addWidget(QLabel("I5 Salida:"), 0, 2)
         self.led_sensor_salida = LedIndicator()
         sensores_layout.addWidget(self.led_sensor_salida, 0, 3)
-
-        sensores_layout.addWidget(QLabel("Pluma ini↑:"), 1, 0)
+        sensores_layout.addWidget(QLabel("Pluma ini arr:"), 1, 0)
         self.led_pluma_ini_arriba = LedIndicator()
         sensores_layout.addWidget(self.led_pluma_ini_arriba, 1, 1)
-
-        sensores_layout.addWidget(QLabel("Pluma ini↓:"), 1, 2)
+        sensores_layout.addWidget(QLabel("Pluma ini abj:"), 1, 2)
         self.led_pluma_ini_abajo = LedIndicator()
         sensores_layout.addWidget(self.led_pluma_ini_abajo, 1, 3)
-
-        sensores_layout.addWidget(QLabel("Pluma fin↑:"), 2, 0)
+        sensores_layout.addWidget(QLabel("Pluma fin arr:"), 2, 0)
         self.led_pluma_fin_arriba = LedIndicator()
         sensores_layout.addWidget(self.led_pluma_fin_arriba, 2, 1)
-
-        sensores_layout.addWidget(QLabel("Pluma fin↓:"), 2, 2)
+        sensores_layout.addWidget(QLabel("Pluma fin abj:"), 2, 2)
         self.led_pluma_fin_abajo = LedIndicator()
         sensores_layout.addWidget(self.led_pluma_fin_abajo, 2, 3)
-
         bot_row.addWidget(grp_sensores)
-        layout.addLayout(bot_row)
 
-        # --- UR3 / Integración ---
-        grp_ur3 = QGroupBox("Estado Integración / UR3")
-        ur3_layout = QHBoxLayout(grp_ur3)
-
-        ur3_layout.addWidget(QLabel("sebListo:"))
+        grp_ur3 = QGroupBox("UR3 / Integracion")
+        ur3_layout = QGridLayout(grp_ur3)
+        ur3_layout.addWidget(QLabel("sebListo:"), 0, 0)
         self.led_seb_listo = LedIndicator()
-        ur3_layout.addWidget(self.led_seb_listo)
-
-        ur3_layout.addWidget(QLabel("sebCaja:"))
+        ur3_layout.addWidget(self.led_seb_listo, 0, 1)
+        ur3_layout.addWidget(QLabel("sebCaja:"), 0, 2)
         self.led_seb_caja = LedIndicator()
-        ur3_layout.addWidget(self.led_seb_caja)
-
-        ur3_layout.addWidget(QLabel("UR1:"))
+        ur3_layout.addWidget(self.led_seb_caja, 0, 3)
+        ur3_layout.addWidget(QLabel("UR1:"), 1, 0)
         self.led_ur1 = LedIndicator()
-        ur3_layout.addWidget(self.led_ur1)
-
-        ur3_layout.addWidget(QLabel("UR2:"))
+        ur3_layout.addWidget(self.led_ur1, 1, 1)
+        ur3_layout.addWidget(QLabel("UR2:"), 1, 2)
         self.led_ur2 = LedIndicator()
-        ur3_layout.addWidget(self.led_ur2)
+        ur3_layout.addWidget(self.led_ur2, 1, 3)
+        bot_row.addWidget(grp_ur3)
 
-        layout.addWidget(grp_ur3)
+        layout.addLayout(bot_row)
 
     # --- Acciones de botones ---
 
@@ -267,19 +335,19 @@ class EntradaTab(QWidget):
         self._write_coil(ENTRADA_STOP, True, "STOP activado")
 
     def on_banda_izq(self):
-        self._write_coil(ENTRADA_BANDA_IZQUIERDA, True, "Banda ← izquierda")
+        self._write_coil(ENTRADA_BANDA_IZQUIERDA, True, "Banda izquierda")
 
     def on_banda_der(self):
-        self._write_coil(ENTRADA_BANDA_DERECHA, True, "Banda → derecha")
+        self._write_coil(ENTRADA_BANDA_DERECHA, True, "Banda derecha")
 
     def on_banda_stop(self):
         self._write_coil(ENTRADA_BANDA_STOP, True, "Banda detenida")
 
     def on_pluma_ini_sube(self):
-        self._write_coil(ENTRADA_PLUMA_INICIO_SUBE, True, "Pluma inicio ↑")
+        self._write_coil(ENTRADA_PLUMA_INICIO_SUBE, True, "Pluma inicio sube")
 
     def on_pluma_ini_baja(self):
-        self._write_coil(ENTRADA_PLUMA_INICIO_BAJA, True, "Pluma inicio ↓")
+        self._write_coil(ENTRADA_PLUMA_INICIO_BAJA, True, "Pluma inicio baja")
 
     def on_pluma_fin(self):
         self._write_coil(ENTRADA_PLUMA_FIN, True, "Pluma fin toggle")
@@ -360,10 +428,7 @@ class EntradaTab(QWidget):
             self.log(f"[ENTRADA] Error: {e}")
 
     def _btn_style(self, color):
-        return (
-            f"background-color: {color}; color: white; "
-            f"font-size: 12px; padding: 8px 12px; border-radius: 4px;"
-        )
+        return styled_btn(color)
 
 
 class CentralTab(QWidget):
@@ -387,23 +452,23 @@ class CentralTab(QWidget):
         grp_control = QGroupBox("Control")
         ctrl_layout = QHBoxLayout(grp_control)
 
-        self.btn_stop = QPushButton("⏹ STOP")
-        self.btn_stop.setStyleSheet(self._btn_style("#F44336"))
+        self.btn_stop = QPushButton("STOP")
+        self.btn_stop.setStyleSheet(self._btn_style("#e03131"))
         self.btn_stop.clicked.connect(self.on_stop)
         ctrl_layout.addWidget(self.btn_stop)
 
         self.btn_llego_caja = QPushButton("Llegó caja")
-        self.btn_llego_caja.setStyleSheet(self._btn_style("#795548"))
+        self.btn_llego_caja.setStyleSheet(self._btn_style("#7048e8"))
         self.btn_llego_caja.clicked.connect(self.on_llego_caja)
         ctrl_layout.addWidget(self.btn_llego_caja)
 
         self.btn_recibio_b3 = QPushButton("Recibió B3")
-        self.btn_recibio_b3.setStyleSheet(self._btn_style("#795548"))
+        self.btn_recibio_b3.setStyleSheet(self._btn_style("#7048e8"))
         self.btn_recibio_b3.clicked.connect(self.on_recibio_b3)
         ctrl_layout.addWidget(self.btn_recibio_b3)
 
         self.btn_ur3_fin = QPushButton("UR3 Fin")
-        self.btn_ur3_fin.setStyleSheet(self._btn_style("#795548"))
+        self.btn_ur3_fin.setStyleSheet(self._btn_style("#7048e8"))
         self.btn_ur3_fin.clicked.connect(self.on_ur3_fin)
         ctrl_layout.addWidget(self.btn_ur3_fin)
 
@@ -429,18 +494,18 @@ class CentralTab(QWidget):
         grp_rotador = QGroupBox("Rotador")
         rot_layout = QHBoxLayout(grp_rotador)
 
-        self.btn_rot_anti = QPushButton("↺ Anti")
-        self.btn_rot_anti.setStyleSheet(self._btn_style("#2196F3"))
+        self.btn_rot_anti = QPushButton("Antihorario")
+        self.btn_rot_anti.setStyleSheet(self._btn_style("#1c7ed6"))
         self.btn_rot_anti.clicked.connect(self.on_rotador_anti)
         rot_layout.addWidget(self.btn_rot_anti)
 
-        self.btn_rot_stop = QPushButton("⏹")
-        self.btn_rot_stop.setStyleSheet(self._btn_style("#607D8B"))
+        self.btn_rot_stop = QPushButton("Stop")
+        self.btn_rot_stop.setStyleSheet(self._btn_style("#868e96"))
         self.btn_rot_stop.clicked.connect(self.on_rotador_stop)
         rot_layout.addWidget(self.btn_rot_stop)
 
-        self.btn_rot_hora = QPushButton("↻ Hora")
-        self.btn_rot_hora.setStyleSheet(self._btn_style("#2196F3"))
+        self.btn_rot_hora = QPushButton("Horario")
+        self.btn_rot_hora.setStyleSheet(self._btn_style("#1c7ed6"))
         self.btn_rot_hora.clicked.connect(self.on_rotador_hora)
         rot_layout.addWidget(self.btn_rot_hora)
 
@@ -449,18 +514,18 @@ class CentralTab(QWidget):
         grp_banda = QGroupBox("Banda")
         banda_layout = QHBoxLayout(grp_banda)
 
-        self.btn_banda_atras = QPushButton("◀ Atrás")
-        self.btn_banda_atras.setStyleSheet(self._btn_style("#2196F3"))
+        self.btn_banda_atras = QPushButton("Atras")
+        self.btn_banda_atras.setStyleSheet(self._btn_style("#1c7ed6"))
         self.btn_banda_atras.clicked.connect(self.on_banda_atras)
         banda_layout.addWidget(self.btn_banda_atras)
 
-        self.btn_banda_stop = QPushButton("⏹")
-        self.btn_banda_stop.setStyleSheet(self._btn_style("#607D8B"))
+        self.btn_banda_stop = QPushButton("Stop")
+        self.btn_banda_stop.setStyleSheet(self._btn_style("#868e96"))
         self.btn_banda_stop.clicked.connect(self.on_banda_stop)
         banda_layout.addWidget(self.btn_banda_stop)
 
-        self.btn_banda_adelante = QPushButton("▶ Adelante")
-        self.btn_banda_adelante.setStyleSheet(self._btn_style("#2196F3"))
+        self.btn_banda_adelante = QPushButton("Adelante")
+        self.btn_banda_adelante.setStyleSheet(self._btn_style("#1c7ed6"))
         self.btn_banda_adelante.clicked.connect(self.on_banda_adelante)
         banda_layout.addWidget(self.btn_banda_adelante)
 
@@ -473,18 +538,18 @@ class CentralTab(QWidget):
         grp_torreta = QGroupBox("Torreta")
         torreta_layout = QHBoxLayout(grp_torreta)
 
-        self.btn_torr_verde = QPushButton("🟢")
-        self.btn_torr_verde.setStyleSheet(self._btn_style("#4CAF50"))
+        self.btn_torr_verde = QPushButton("Verde")
+        self.btn_torr_verde.setStyleSheet(self._btn_style("#2f9e44"))
         self.btn_torr_verde.clicked.connect(self.on_torreta_verde)
         torreta_layout.addWidget(self.btn_torr_verde)
 
-        self.btn_torr_amarillo = QPushButton("🟡")
-        self.btn_torr_amarillo.setStyleSheet(self._btn_style("#FFC107"))
+        self.btn_torr_amarillo = QPushButton("Amarillo")
+        self.btn_torr_amarillo.setStyleSheet(self._btn_style("#f08c00"))
         self.btn_torr_amarillo.clicked.connect(self.on_torreta_amarillo)
         torreta_layout.addWidget(self.btn_torr_amarillo)
 
-        self.btn_torr_rojo = QPushButton("🔴")
-        self.btn_torr_rojo.setStyleSheet(self._btn_style("#F44336"))
+        self.btn_torr_rojo = QPushButton("Rojo")
+        self.btn_torr_rojo.setStyleSheet(self._btn_style("#e03131"))
         self.btn_torr_rojo.clicked.connect(self.on_torreta_rojo)
         torreta_layout.addWidget(self.btn_torr_rojo)
 
@@ -535,22 +600,22 @@ class CentralTab(QWidget):
         self._write_coil(CENTRAL_UR3_FIN, True, "Señal: UR3 fin")
 
     def on_rotador_anti(self):
-        self._write_coil(CENTRAL_ROTADOR_ANTIHORARIO, True, "Rotador ↺ antihorario")
+        self._write_coil(CENTRAL_ROTADOR_ANTIHORARIO, True, "Rotador antihorario")
 
     def on_rotador_stop(self):
         self._write_coil(CENTRAL_ROTADOR_STOP, True, "Rotador detenido")
 
     def on_rotador_hora(self):
-        self._write_coil(CENTRAL_ROTADOR_HORARIO, True, "Rotador ↻ horario")
+        self._write_coil(CENTRAL_ROTADOR_HORARIO, True, "Rotador horario")
 
     def on_banda_atras(self):
-        self._write_coil(CENTRAL_BANDA_ATRAS, True, "Banda ◀ atrás")
+        self._write_coil(CENTRAL_BANDA_ATRAS, True, "Banda atras")
 
     def on_banda_stop(self):
         self._write_coil(CENTRAL_BANDA_STOP, True, "Banda detenida")
 
     def on_banda_adelante(self):
-        self._write_coil(CENTRAL_BANDA_ADELANTE, True, "Banda ▶ adelante")
+        self._write_coil(CENTRAL_BANDA_ADELANTE, True, "Banda adelante")
 
     def on_torreta_verde(self):
         self._write_coil(CENTRAL_TORRETA_VERDE, True, "Torreta verde ON")
@@ -600,10 +665,7 @@ class CentralTab(QWidget):
             self.log(f"[CENTRAL] Error: {e}")
 
     def _btn_style(self, color):
-        return (
-            f"background-color: {color}; color: white; "
-            f"font-size: 12px; padding: 8px 12px; border-radius: 4px;"
-        )
+        return styled_btn(color)
 
 
 class SalidaTab(QWidget):
@@ -627,13 +689,13 @@ class SalidaTab(QWidget):
         grp_control = QGroupBox("Control")
         ctrl_layout = QHBoxLayout(grp_control)
 
-        self.btn_init = QPushButton("▶ Init Proceso")
-        self.btn_init.setStyleSheet(self._btn_style("#4CAF50"))
+        self.btn_init = QPushButton("Init Proceso")
+        self.btn_init.setStyleSheet(self._btn_style("#2f9e44"))
         self.btn_init.clicked.connect(self.on_init_proceso)
         ctrl_layout.addWidget(self.btn_init)
 
-        self.btn_stop = QPushButton("⏹ STOP")
-        self.btn_stop.setStyleSheet(self._btn_style("#F44336"))
+        self.btn_stop = QPushButton("STOP")
+        self.btn_stop.setStyleSheet(self._btn_style("#e03131"))
         self.btn_stop.clicked.connect(self.on_stop)
         ctrl_layout.addWidget(self.btn_stop)
 
@@ -642,18 +704,18 @@ class SalidaTab(QWidget):
         grp_leds = QGroupBox("LEDs")
         leds_layout = QHBoxLayout(grp_leds)
 
-        self.btn_led_verde = QPushButton("🟢 Verde")
-        self.btn_led_verde.setStyleSheet(self._btn_style("#4CAF50"))
+        self.btn_led_verde = QPushButton("Verde")
+        self.btn_led_verde.setStyleSheet(self._btn_style("#2f9e44"))
         self.btn_led_verde.clicked.connect(self.on_led_verde)
         leds_layout.addWidget(self.btn_led_verde)
 
-        self.btn_led_amarillo = QPushButton("🟡 Amarillo")
-        self.btn_led_amarillo.setStyleSheet(self._btn_style("#FFC107"))
+        self.btn_led_amarillo = QPushButton("Amarillo")
+        self.btn_led_amarillo.setStyleSheet(self._btn_style("#f08c00"))
         self.btn_led_amarillo.clicked.connect(self.on_led_amarillo)
         leds_layout.addWidget(self.btn_led_amarillo)
 
-        self.btn_led_rojo = QPushButton("🔴 Rojo")
-        self.btn_led_rojo.setStyleSheet(self._btn_style("#F44336"))
+        self.btn_led_rojo = QPushButton("Rojo")
+        self.btn_led_rojo.setStyleSheet(self._btn_style("#e03131"))
         self.btn_led_rojo.clicked.connect(self.on_led_rojo)
         leds_layout.addWidget(self.btn_led_rojo)
 
@@ -667,18 +729,18 @@ class SalidaTab(QWidget):
         banda_layout = QVBoxLayout(grp_banda)
 
         banda_btns = QHBoxLayout()
-        self.btn_banda_izq = QPushButton("◀ Izq")
-        self.btn_banda_izq.setStyleSheet(self._btn_style("#2196F3"))
+        self.btn_banda_izq = QPushButton("Izq")
+        self.btn_banda_izq.setStyleSheet(self._btn_style("#1c7ed6"))
         self.btn_banda_izq.clicked.connect(self.on_banda_izq)
         banda_btns.addWidget(self.btn_banda_izq)
 
-        self.btn_banda_off = QPushButton("⏹ Off")
-        self.btn_banda_off.setStyleSheet(self._btn_style("#607D8B"))
+        self.btn_banda_off = QPushButton("Off")
+        self.btn_banda_off.setStyleSheet(self._btn_style("#868e96"))
         self.btn_banda_off.clicked.connect(self.on_banda_off)
         banda_btns.addWidget(self.btn_banda_off)
 
-        self.btn_banda_der = QPushButton("▶ Der")
-        self.btn_banda_der.setStyleSheet(self._btn_style("#2196F3"))
+        self.btn_banda_der = QPushButton("Der")
+        self.btn_banda_der.setStyleSheet(self._btn_style("#1c7ed6"))
         self.btn_banda_der.clicked.connect(self.on_banda_der)
         banda_btns.addWidget(self.btn_banda_der)
 
@@ -715,19 +777,23 @@ class SalidaTab(QWidget):
 
         plumas_layout.addWidget(QLabel("Entrada:"), 0, 0)
         self.btn_pluma_ent_abrir = QPushButton("Abrir")
+        self.btn_pluma_ent_abrir.setStyleSheet(self._btn_style("#2f9e44"))
         self.btn_pluma_ent_abrir.clicked.connect(self.on_pluma_entrada_abrir)
         plumas_layout.addWidget(self.btn_pluma_ent_abrir, 0, 1)
 
         self.btn_pluma_ent_cerrar = QPushButton("Cerrar")
+        self.btn_pluma_ent_cerrar.setStyleSheet(self._btn_style("#e03131"))
         self.btn_pluma_ent_cerrar.clicked.connect(self.on_pluma_entrada_cerrar)
         plumas_layout.addWidget(self.btn_pluma_ent_cerrar, 0, 2)
 
         plumas_layout.addWidget(QLabel("Salida:"), 1, 0)
         self.btn_pluma_sal_abrir = QPushButton("Abrir")
+        self.btn_pluma_sal_abrir.setStyleSheet(self._btn_style("#2f9e44"))
         self.btn_pluma_sal_abrir.clicked.connect(self.on_pluma_salida_abrir)
         plumas_layout.addWidget(self.btn_pluma_sal_abrir, 1, 1)
 
         self.btn_pluma_sal_cerrar = QPushButton("Cerrar")
+        self.btn_pluma_sal_cerrar.setStyleSheet(self._btn_style("#e03131"))
         self.btn_pluma_sal_cerrar.clicked.connect(self.on_pluma_salida_cerrar)
         plumas_layout.addWidget(self.btn_pluma_sal_cerrar, 1, 2)
 
@@ -763,7 +829,7 @@ class SalidaTab(QWidget):
     # --- Acciones de botones ---
 
     def on_init_proceso(self):
-        self._write_bit(SALIDA_BIT_INIT_PROCESO, True, "Init proceso (Estado 0→1)")
+        self._write_bit(SALIDA_BIT_INIT_PROCESO, True, "Init proceso (Estado 0 a 1)")
 
     def on_stop(self):
         self._write_bit(SALIDA_BIT_STOP, True, "STOP activado")
@@ -778,13 +844,13 @@ class SalidaTab(QWidget):
         self._write_bit(SALIDA_BIT_LED_ROJO, True, "LED rojo ON")
 
     def on_banda_izq(self):
-        self._write_register(SALIDA_SWITCH_BANDA, 5376, "Banda ◀ izquierda")
+        self._write_register(SALIDA_SWITCH_BANDA, 5376, "Banda izquierda")
 
     def on_banda_off(self):
         self._write_register(SALIDA_SWITCH_BANDA, 5377, "Banda detenida")
 
     def on_banda_der(self):
-        self._write_register(SALIDA_SWITCH_BANDA, 5378, "Banda ▶ derecha")
+        self._write_register(SALIDA_SWITCH_BANDA, 5378, "Banda derecha")
 
     def on_pluma_entrada_abrir(self):
         self._write_bit(SALIDA_BIT_LED_VERDE, True, "Pluma entrada abierta")
@@ -857,10 +923,7 @@ class SalidaTab(QWidget):
             self.log(f"[SALIDA] Error: {e}")
 
     def _btn_style(self, color):
-        return (
-            f"background-color: {color}; color: white; "
-            f"font-size: 12px; padding: 8px 12px; border-radius: 4px;"
-        )
+        return styled_btn(color)
 
 
 class MainWindow(QMainWindow):
@@ -868,8 +931,8 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("SCADA - Bandas Automatizadas")
-        self.setMinimumSize(750, 550)
+        self.setWindowTitle("SCADA - Bandas Automatizadas | Horner XL4")
+        self.setMinimumSize(900, 700)
 
         self.manager = PLCManager()
 
@@ -877,15 +940,23 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout(central_widget)
 
-        # Header con estado de conexión
+        # Header con título y estado
         header = QHBoxLayout()
-        self.lbl_status = QLabel("Desconectado")
-        self.lbl_status.setFont(QFont("Arial", 10, QFont.Bold))
-        self.lbl_status.setStyleSheet("color: #F44336;")
+
+        title = QLabel("SCADA CONTROL")
+        title.setFont(QFont("Segoe UI", 14, QFont.Bold))
+        title.setStyleSheet("color: #4263eb;")
+        header.addWidget(title)
+
         header.addStretch()
+
+        self.lbl_status = QLabel("DESCONECTADO")
+        self.lbl_status.setFont(QFont("Segoe UI", 10, QFont.Bold))
+        self.lbl_status.setStyleSheet("color: #e03131;")
         header.addWidget(self.lbl_status)
 
-        self.btn_connect = QPushButton("Conectar")
+        self.btn_connect = QPushButton("CONECTAR")
+        self.btn_connect.setStyleSheet(styled_btn("#4263eb"))
         self.btn_connect.clicked.connect(self.toggle_connection)
         header.addWidget(self.btn_connect)
         main_layout.addLayout(header)
@@ -917,7 +988,7 @@ class MainWindow(QMainWindow):
         self.log_message("Sistema listo. Presiona 'Conectar' para iniciar.")
 
     def toggle_connection(self):
-        if self.btn_connect.text() == "Conectar":
+        if self.btn_connect.text() == "CONECTAR":
             self.log_message("Conectando a PLCs...")
             try:
                 results = self.manager.initialize()
@@ -929,14 +1000,15 @@ class MainWindow(QMainWindow):
                 self.tab_salida.connected = results.get("HORNER_1", False)
 
                 if connected_count > 0:
-                    self.lbl_status.setText(f"Conectado: {connected_count}/{total}")
-                    self.lbl_status.setStyleSheet("color: #4CAF50;")
-                    self.btn_connect.setText("Desconectar")
+                    self.lbl_status.setText(f"ONLINE {connected_count}/{total}")
+                    self.lbl_status.setStyleSheet("color: #2f9e44;")
+                    self.btn_connect.setText("DESCONECTAR")
+                    self.btn_connect.setStyleSheet(styled_btn("#e03131"))
                     self.timer.start(500)
-                    self.log_message(f"Conexión exitosa: {connected_count}/{total} PLCs")
+                    self.log_message(f"Conexion exitosa: {connected_count}/{total} PLCs")
                 else:
-                    self.lbl_status.setText("Sin conexión")
-                    self.lbl_status.setStyleSheet("color: #F44336;")
+                    self.lbl_status.setText("SIN CONEXION")
+                    self.lbl_status.setStyleSheet("color: #e03131;")
                     self.log_message("No se pudo conectar a ningún PLC")
 
                 for plc_id, status in results.items():
@@ -950,9 +1022,10 @@ class MainWindow(QMainWindow):
             self.tab_entrada.connected = False
             self.tab_central.connected = False
             self.tab_salida.connected = False
-            self.lbl_status.setText("Desconectado")
-            self.lbl_status.setStyleSheet("color: #F44336;")
-            self.btn_connect.setText("Conectar")
+            self.lbl_status.setText("DESCONECTADO")
+            self.lbl_status.setStyleSheet("color: #e03131;")
+            self.btn_connect.setText("CONECTAR")
+            self.btn_connect.setStyleSheet(styled_btn("#4263eb"))
             self.log_message("Desconectado de todos los PLCs")
 
     def refresh_all(self):
@@ -974,6 +1047,7 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setStyleSheet(STYLESHEET)
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
