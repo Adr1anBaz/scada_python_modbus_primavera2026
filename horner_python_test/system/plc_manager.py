@@ -176,14 +176,22 @@ class PLCManager(EventEmitter):
     # =========================================================================
     # OPERACIONES CON REGISTROS (acceso directo desde el manager)
     # =========================================================================
-    
+
     def read_register(self, plc_id: str, address: int) -> int:
         """Lee un registro en un PLC específico."""
         return self.get_device(plc_id).read_register(address)
-    
+
     def write_register(self, plc_id: str, address: int, value: int) -> None:
         """Escribe un registro en un PLC específico."""
         self.get_device(plc_id).write_register(address, value)
+
+    def read_register_bit(self, plc_id: str, address: int, bit: int) -> bool:
+        """Lee un bit específico de un registro en un PLC."""
+        return self.get_device(plc_id).read_register_bit(address, bit)
+
+    def write_register_bit(self, plc_id: str, address: int, bit: int, state: bool) -> None:
+        """Escribe un bit específico de un registro en un PLC sin afectar los demás."""
+        self.get_device(plc_id).write_register_bit(address, bit, state)
     
     def write_register_multiple(self, operations: List[Tuple[str, int, int]]) -> Dict[str, bool]:
         """

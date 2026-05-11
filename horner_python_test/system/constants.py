@@ -64,3 +64,107 @@ CENTRAL_PILOTO_SENSOR_GIRO = 6066     # T66 - sensor de fin de giro
 CENTRAL_PILOTO_BOTON_VERDE = 6067     # T67 - botón verde
 CENTRAL_PILOTO_BOTON_ROJO = 6068      # T68 - botón rojo
 CENTRAL_PILOTO_BOTON_PARO = 6069      # T69 - botón de paro
+
+
+# =============================================================================
+# PLC ENTRADA (HORNER_2 - 192.168.3.132)
+# Banda de entrada
+# IMPORTANTE: Estas constantes SOLO aplican para HORNER_2.
+# Usar exclusivamente con: manager.write_coil("HORNER_2", ENTRADA_XXX, value)
+#                      o:  manager.read_input("HORNER_2", ENTRADA_XXX)
+# =============================================================================
+
+# --- Navegación HMI (solo cambian pantalla, no afectan actuadores) ---
+# ENTRADA_SCREEN_2 = (navegación interna HMI)
+# ENTRADA_SCREEN_1 = (navegación interna HMI)
+# ENTRADA_SCREEN_3 = (navegación interna HMI)
+
+# --- Control general (modo integración) ---
+ENTRADA_STOP = 6030                    # T30 - STOP, frena todo el sistema
+ENTRADA_INICIO = 6099                  # T99 - señal que inicia el proceso
+
+# --- Control general (modo individual) ---
+ENTRADA_STOP_INDIVIDUAL = 6033         # T33 - STOP en modo individual
+ENTRADA_INICIO_INDIVIDUAL = 6999       # T999 - señal que inicia proceso en modo individual
+
+# --- Pilotos de lámparas (lectura) ---
+ENTRADA_LAMPARA_VERDE = 6009           # T9 - lámpara verde
+ENTRADA_LAMPARA_AMARILLA = 6088        # T88 - lámpara amarilla, indica paso de caja
+ENTRADA_LAMPARA_ROJA = 6077            # T77 - lámpara roja, indica paro
+
+# --- Modo prueba: control de plumas ---
+ENTRADA_PLUMA_INICIO_SUBE = 6005       # T5 - levanta la pluma de inicio
+ENTRADA_PLUMA_INICIO_BAJA = 6006       # T6 - baja la pluma de inicio
+ENTRADA_PLUMA_FIN = 6007               # T7 - levanta/baja la pluma de fin
+
+# --- Modo prueba: control de banda ---
+ENTRADA_BANDA_DERECHA = 6045           # T45 - arranca banda a la derecha
+ENTRADA_BANDA_IZQUIERDA = 6044         # T44 - arranca banda a la izquierda
+ENTRADA_BANDA_STOP = 6046              # T46 - detiene la banda
+
+# --- Modo prueba: torreta manual ---
+ENTRADA_TORRETA_VERDE = 6345           # T345 - enciende lámpara verde
+ENTRADA_TORRETA_AMARILLA = 6346        # T346 - enciende lámpara amarilla
+ENTRADA_TORRETA_ROJA = 6347            # T347 - enciende lámpara roja
+
+# --- Modo individual: pilotos de estado UR3/banda (lectura) ---
+ENTRADA_SEB_LISTO = 6995              # T995 - banda media en posición de recibir caja
+ENTRADA_SEB_CAJA = 6998               # T998 - caja ya está en banda media
+ENTRADA_UR1 = 6997                    # T997 - UR3 ya puso caja en banda inicial
+ENTRADA_UR2 = 6996                    # T996 - UR3 ya puede poner otra caja
+
+# --- Entradas físicas (usar con manager.read_input) ---
+ENTRADA_INPUT_SENSOR_ENTRADA = 3      # I4 - sensor de entrada (censado)
+ENTRADA_INPUT_SENSOR_SALIDA = 4       # I5 - sensor de salida (censado)
+
+# --- Salidas físicas (lectura con read_coil) ---
+ENTRADA_PLUMA_INICIO_ARRIBA = 7       # Q8 - LED pluma inicio arriba
+ENTRADA_PLUMA_INICIO_ABAJO = 8        # Q9 - LED pluma inicio abajo
+ENTRADA_PLUMA_FIN_ARRIBA = 5          # Q6 - LED pluma fin arriba
+ENTRADA_PLUMA_FIN_ABAJO = 6           # Q7 - LED pluma fin abajo
+
+# --- Registros VFD ---
+ENTRADA_VFD_ESCRIBIR = 3497           # R498 - escribir frecuencia del VFD
+ENTRADA_VFD_LEER = 3507               # R508 - leer frecuencia del VFD
+
+
+# =============================================================================
+# PLC SALIDA (HORNER_1 - 192.168.3.131)
+# Banda de salida
+# IMPORTANTE: Estas constantes SOLO aplican para HORNER_1.
+# Usar exclusivamente con: manager.write_register_bit("HORNER_1", SALIDA_REG_CONTROL, bit, state)
+#                      o:  manager.read_register("HORNER_1", SALIDA_XXX)
+#                      o:  manager.read_input("HORNER_1", SALIDA_INPUT_XXX)
+# =============================================================================
+
+# --- Registro de control de bits (R170 = dirección 3169) ---
+# Las M originales fueron remapeadas como bits de este registro.
+SALIDA_REG_CONTROL = 3169             # R170 - registro que contiene todas las M como bits
+
+# Bits del registro R170:
+SALIDA_BIT_MODO_INT_A_PROC = 0        # M29 (R170.0) - Modo Integración → Modo Proceso
+SALIDA_BIT_MODO_PROC_A_INT = 1        # M33 (R170.1) - Modo Proceso → Modo Integración
+SALIDA_BIT_INIT_PROCESO = 2           # M32 (R170.2) - initPru, pasa Estado 0 a Estado 1
+SALIDA_BIT_MODO_PROC_A_IND = 3        # M36 (R170.3) - Modo Proceso → Modo Individual
+SALIDA_BIT_LED_ROJO = 4               # M46 (R170.4) - encender LED rojo
+SALIDA_BIT_LED_AMARILLO = 5           # M47 (R170.5) - encender LED amarillo
+SALIDA_BIT_STOP = 6                   # M49 (R170.6) - stop/paro
+SALIDA_BIT_LED_VERDE = 7              # M41 (R170.7) - encender LED verde / abrir pluma entrada
+SALIDA_BIT_PLUMA_ENTRADA_CERRAR = 8   # M42 (R170.8) - cerrar pluma de entrada
+SALIDA_BIT_PLUMA_SALIDA_ABRIR = 9     # M43 (R170.9) - abrir pluma de salida
+SALIDA_BIT_PLUMA_SALIDA_CERRAR = 10   # M44 (R170.10) - cerrar pluma de salida
+SALIDA_BIT_MODO_IND_A_PROC = 11       # M37 (R170.11) - Modo Individual → Modo Proceso
+# SALIDA_BIT_RESET_BANDA = ?          # M45 - reset banda (manda 2 a R506) — no mapeado en notasLeo
+
+# --- Registros directos ---
+SALIDA_VFD_ESCRIBIR = 3497            # R498 - escribir frecuencia (x100 → R504)
+SALIDA_VFD_LEER = 3507                # R508 - leer frecuencia actual (R502/100)
+SALIDA_MAQUINA_ESTADOS = 3000         # R1 - registro de máquina de estados
+SALIDA_SWITCH_BANDA = 3099            # R100 - switch 3 posiciones (5376=izq, 5377=off, 5378=der)
+
+# --- Entradas físicas (usar con manager.read_input) ---
+SALIDA_INPUT_BOTON_NA = 0             # I1 - botón NA
+SALIDA_INPUT_BOTON_NC = 1             # I2 - botón NC
+SALIDA_INPUT_EMERGENCIA = 2           # I3 - botón de emergencia NC
+SALIDA_INPUT_SENSOR_SALIDA = 3        # I4 - sensor de salida
+SALIDA_INPUT_SENSOR_ENTRADA = 4       # I5 - sensor de entrada

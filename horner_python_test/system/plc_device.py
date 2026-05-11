@@ -302,6 +302,45 @@ class PLCDevice(EventEmitter):
             raise RuntimeError(f"Error escribiendo registro {address} en {self.plc_id}: {e}")
     
     # =========================================================================
+    # OPERACIONES CON BITS DE REGISTRO
+    # Útil cuando múltiples señales (M) están mapeadas como bits de un registro.
+    # Ejemplo: R170.4 = bit 4 del registro en dirección 3169
+    # =========================================================================
+
+    def read_register_bit(self, address: int, bit: int) -> bool:
+        """
+        Lee un bit específico de un registro.
+
+        Args:
+            address: Dirección Modbus del registro
+            bit: Número de bit (0-15)
+
+        Returns:
+            True si el bit está en 1, False si está en 0
+        """
+        value = self.read_register(address)
+        return bool(value & (1 << bit))
+
+    def write_register_bit(self, address: int, bit: int, state: bool) -> None:
+        """
+        Escribe un bit específico de un registro sin afectar los demás.
+        Lee el registro actual, modifica el bit, y lo escribe de vuelta.
+
+        Args:
+            address: Dirección Modbus del registro
+            bit: Número de bit (0-15)
+            state: True para setear (1), False para limpiar (0)
+        """
+        current = self.read_register(address)
+
+        if state:
+            new_value = current | (1 << bit)
+        else:
+            new_value = current & ~(1 << bit)
+
+        self.write_register(address, new_value)
+
+    # =========================================================================
     # CACHÉ Y UTILIDADES
     # =========================================================================
     
