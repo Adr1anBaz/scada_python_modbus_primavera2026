@@ -548,6 +548,23 @@ class CentralTab(QWidget):
         self.connected = False
         self.setup_ui()
 
+        self.fast_timer = QTimer(self)
+        self.fast_timer.timeout.connect(self._poll_mode)
+        self.fast_timer.start(80)
+
+    def _poll_mode(self):
+        if not self.connected:
+            return
+        try:
+            prueba_active = self.manager.read_coil(self.PLC_ID, CENTRAL_MODO_PRUEBA)
+            if prueba_active != self.btn_t51.isChecked():
+                self.btn_t51.blockSignals(True)
+                self.btn_t51.setChecked(prueba_active)
+                self.btn_t51.blockSignals(False)
+                self._set_prueba_enabled(prueba_active)
+        except Exception:
+            pass
+
     def setup_ui(self):
         layout = QVBoxLayout(self)
 
@@ -788,12 +805,14 @@ class CentralTab(QWidget):
         self._pulse_coil(CENTRAL_MODO_INTEGRACION, "Modo Integración (T70)")
 
     def on_modo_prueba(self, checked):
-        self._write_coil(CENTRAL_MODO_PRUEBA, checked, f"T51 {'ON' if checked else 'OFF'}")
+        if checked:
+            self._write_coil(CENTRAL_MODO_PRUEBA, True, "T51 ON")
+            QTimer.singleShot(50, lambda: self._write_coil(CENTRAL_MODO_PRUEBA, False, "T51 OFF (toggle)"))
         self._set_prueba_enabled(checked)
 
     def on_menu(self):
         self._write_coil(CENTRAL_MENU, True, "Menú (T53)")
-        QTimer.singleShot(100, lambda: self._write_coil(CENTRAL_MENU, False, "T53 OFF"))
+        QTimer.singleShot(50, lambda: self._write_coil(CENTRAL_MENU, False, "T53 OFF"))
         self.btn_t51.blockSignals(True)
         self.btn_t51.setChecked(False)
         self.btn_t51.blockSignals(False)
@@ -844,13 +863,6 @@ class CentralTab(QWidget):
             return
 
         try:
-            prueba_active = self.manager.read_coil(self.PLC_ID, CENTRAL_MODO_PRUEBA)
-            if prueba_active != self.btn_t51.isChecked():
-                self.btn_t51.blockSignals(True)
-                self.btn_t51.setChecked(prueba_active)
-                self.btn_t51.blockSignals(False)
-                self._set_prueba_enabled(prueba_active)
-
             self.led_recibido.update_state(
                 self.manager.read_coil(self.PLC_ID, CENTRAL_PILOTO_RECIBIDO))
             self.led_listo.update_state(
