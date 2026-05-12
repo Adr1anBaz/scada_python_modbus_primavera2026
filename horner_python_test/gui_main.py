@@ -556,7 +556,7 @@ class CentralTab(QWidget):
         if not self.connected:
             return
         try:
-            prueba_active = self.manager.read_coil(self.PLC_ID, CENTRAL_MODO_PRUEBA)
+            prueba_active = self.manager.read_coil(self.PLC_ID, CENTRAL_MODO_PRUEBA_ACTIVO)
             if prueba_active != self.btn_t51.isChecked():
                 self.btn_t51.blockSignals(True)
                 self.btn_t51.setChecked(prueba_active)

@@ -29,7 +29,8 @@ DEFAULT_PORT = 502   # Puerto estándar Modbus TCP
 # Fórmula real: T_n = 5999 + n
 CENTRAL_MODO_PROCESO = 6075         # T76 → addr 6075
 CENTRAL_MODO_INTEGRACION = 6069     # T70 → addr 6069
-CENTRAL_MODO_PRUEBA = 6050          # T51 → addr 6050
+CENTRAL_MODO_PRUEBA = 6050          # T51 → addr 6050 (toggle para entrar/salir)
+CENTRAL_MODO_PRUEBA_ACTIVO = 6051   # T52 → addr 6051 (estado: 1 = estoy en modo prueba)
 CENTRAL_MENU = 6052                 # T53 → addr 6052
 
 # --- Control general ---
