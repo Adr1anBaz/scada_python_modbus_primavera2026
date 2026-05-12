@@ -812,12 +812,20 @@ class CentralTab(QWidget):
 
     def on_menu(self):
         self._write_coil(CENTRAL_MENU, True, "Menú (T53)")
-        QTimer.singleShot(50, lambda: self._write_coil(CENTRAL_MENU, False, "T53 OFF"))
+        self._write_coil(CENTRAL_MODO_PROCESO, True, "T76 pulso")
+        self._write_coil(CENTRAL_MODO_INTEGRACION, True, "T70 pulso")
+        self._write_coil(CENTRAL_MODO_PRUEBA, True, "T51 pulso")
+        QTimer.singleShot(50, self._menu_release)
         self.btn_t51.blockSignals(True)
         self.btn_t51.setChecked(False)
         self.btn_t51.blockSignals(False)
-        self._write_coil(CENTRAL_MODO_PRUEBA, False, "T51 OFF (regreso a menú)")
         self._set_prueba_enabled(False)
+
+    def _menu_release(self):
+        self._write_coil(CENTRAL_MENU, False, "T53 OFF")
+        self._write_coil(CENTRAL_MODO_PROCESO, False, "T76 OFF")
+        self._write_coil(CENTRAL_MODO_INTEGRACION, False, "T70 OFF")
+        self._write_coil(CENTRAL_MODO_PRUEBA, False, "T51 OFF")
 
     def on_rotador_anti(self):
         self._pulse_coil(CENTRAL_ROTADOR_ANTIHORARIO, "Rotador antihorario")
