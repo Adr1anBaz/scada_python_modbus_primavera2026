@@ -590,11 +590,16 @@ class CentralTab(QWidget):
         self.btn_ur3_fin.clicked.connect(self.on_ur3_fin)
         ctrl_layout.addWidget(self.btn_ur3_fin)
 
-        self.btn_t51 = QPushButton("T51")
+        self.btn_t51 = QPushButton("Modo Prueba")
         self.btn_t51.setCheckable(True)
         self.btn_t51.setStyleSheet(self._btn_style("#7048e8"))
         self.btn_t51.toggled.connect(self.on_modo_prueba)
         ctrl_layout.addWidget(self.btn_t51)
+
+        self.btn_menu = QPushButton("Menú")
+        self.btn_menu.setStyleSheet(self._btn_style("#868e96"))
+        self.btn_menu.clicked.connect(self.on_menu)
+        ctrl_layout.addWidget(self.btn_menu)
 
         top_row.addWidget(grp_control)
 
@@ -740,6 +745,13 @@ class CentralTab(QWidget):
 
     def on_modo_prueba(self, checked):
         self._write_coil(CENTRAL_MODO_PRUEBA, checked, f"T51 {'ON' if checked else 'OFF'}")
+
+    def on_menu(self):
+        self._write_coil(CENTRAL_MENU, True, "Menú (T53)")
+        self.btn_t51.blockSignals(True)
+        self.btn_t51.setChecked(False)
+        self.btn_t51.blockSignals(False)
+        self._write_coil(CENTRAL_MODO_PRUEBA, False, "T51 OFF (regreso a menú)")
 
     def on_rotador_anti(self):
         self._pulse_coil(CENTRAL_ROTADOR_ANTIHORARIO, "Rotador antihorario")
