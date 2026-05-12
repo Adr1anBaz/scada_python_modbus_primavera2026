@@ -1,15 +1,15 @@
 """
 CLI para escribir/leer variables directamente al PLC Salida (HORNER_1).
 Uso:
-  M29 1       -> write_register_bit(3169, bit0, True)
-  M29 0       -> write_register_bit(3169, bit0, False)
-  M29         -> read_register_bit(3169, bit0)
+  B0 1        -> write_register_bit(R170, bit 0, True)  [Int→Proc]
+  B0 0        -> write_register_bit(R170, bit 0, False)
+  B0          -> read_register_bit(R170, bit 0)
   R498 500    -> write_register(3497, 500)
   R508        -> read_register(3507)
   R1          -> read_register(3000)
   R100        -> read_register(3099) [switch banda]
   I1          -> read_discrete_input(0)
-  scan        -> lee todas las M y registros conocidos
+  scan        -> lee todos los bits de R170, registros y entradas
   q           -> salir
 """
 
@@ -22,20 +22,20 @@ client = ModbusTcpClient(host=HOST, port=PORT, timeout=3)
 
 REG_CONTROL = 3169  # R170
 
-M_BITS = {
-    29: (0, "Modo Integracion → Modo Proceso"),
-    33: (1, "Modo Proceso → Modo Integracion"),
-    32: (2, "initPru (Estado 0 → Estado 1)"),
-    36: (3, "Modo Proceso → Modo Individual"),
-    46: (4, "LED rojo"),
-    47: (5, "LED amarillo"),
-    49: (6, "STOP/paro"),
-    41: (7, "LED verde / abrir pluma entrada"),
-    42: (8, "Cerrar pluma entrada"),
-    43: (9, "Abrir pluma salida"),
-    44: (10, "Cerrar pluma salida"),
-    37: (11, "Modo Individual → Modo Proceso"),
-    45: (12, "Banda salida (enclavable)"),
+BITS = {
+    0: "Int → Proc (ex-M29)",
+    1: "Proc → Int (ex-M33)",
+    2: "initPru Estado 0→1 (ex-M32)",
+    3: "Proc → Individual (ex-M36)",
+    4: "LED rojo (ex-M46)",
+    5: "LED amarillo (ex-M47)",
+    6: "STOP/paro (ex-M49)",
+    7: "LED verde / abrir pluma entrada (ex-M41)",
+    8: "Cerrar pluma entrada (ex-M42)",
+    9: "Abrir pluma salida (ex-M43)",
+    10: "Cerrar pluma salida (ex-M44)",
+    11: "Individual → Proc (ex-M37)",
+    12: "Banda salida enclavable (ex-M45)",
 }
 
 INPUTS = {
@@ -81,18 +81,18 @@ def parse_command(cmd: str):
         scan_all()
         return
 
-    if token.startswith("M"):
+    if token.startswith("B"):
         try:
-            num = int(token[1:])
+            bit = int(token[1:])
         except ValueError:
-            print(f"  Error: '{token}' no es una M valida")
+            print(f"  Error: '{token}' no es un bit valido")
             return
 
-        if num not in M_BITS:
-            print(f"  Error: M{num} no esta mapeada. Disponibles: {sorted(M_BITS.keys())}")
+        if bit not in BITS:
+            print(f"  Error: bit {bit} no mapeado. Disponibles: 0-{max(BITS.keys())}")
             return
 
-        bit, desc = M_BITS[num]
+        desc = BITS[bit]
 
         if len(parts) >= 2:
             try:
@@ -102,15 +102,15 @@ def parse_command(cmd: str):
             state = val != 0
             result = write_register_bit(REG_CONTROL, bit, state)
             if result and not result.isError():
-                print(f"  OK: M{num} (R170.{bit}) = {1 if state else 0}  | {desc}")
+                print(f"  OK: R170.{bit} = {1 if state else 0}  | {desc}")
             else:
-                print(f"  ERROR escribiendo M{num}: {result}")
+                print(f"  ERROR escribiendo R170.{bit}: {result}")
         else:
             val = read_register_bit(REG_CONTROL, bit)
             if val is not None:
-                print(f"  M{num} (R170.{bit}) = {val}  | {desc}")
+                print(f"  R170.{bit} = {val}  | {desc}")
             else:
-                print(f"  ERROR leyendo M{num}")
+                print(f"  ERROR leyendo R170.{bit}")
         return
 
     if token.startswith("I"):
@@ -159,7 +159,7 @@ def parse_command(cmd: str):
         return
 
     print(f"  Comando no reconocido: {token}")
-    print("  Uso: M<num> [0|1]  |  R<num> [valor]  |  I<num>  |  scan  |  q")
+    print("  Uso: B<bit> [0|1]  |  R<num> [valor]  |  I<num>  |  scan  |  q")
 
 
 def scan_all():
@@ -175,15 +175,15 @@ def scan_all():
         raw = None
 
     print()
-    print("  --- Bits de R170 (M markers) ---")
-    for m_num in sorted(M_BITS.keys()):
-        bit, desc = M_BITS[m_num]
+    print("  --- Bits de R170 ---")
+    for bit in sorted(BITS.keys()):
+        desc = BITS[bit]
         if raw is not None:
             val = (raw >> bit) & 1
             marker = " <--" if val else ""
-            print(f"  M{m_num:2d} (bit {bit:2d}) = {val}{marker}  | {desc}")
+            print(f"  R170.{bit:2d} = {val}{marker}  | {desc}")
         else:
-            print(f"  M{m_num:2d} (bit {bit:2d}) = ERR  | {desc}")
+            print(f"  R170.{bit:2d} = ERR  | {desc}")
 
     print()
     print("  --- Registros directos ---")
@@ -222,8 +222,8 @@ def main():
         print("ERROR: No se pudo conectar al PLC Salida.")
         return
 
-    print("Conectado. Escribe comandos (M<num> [0|1], R<num> [val], I<num>, scan, q)")
-    print(f"  M disponibles: {sorted(M_BITS.keys())}")
+    print("Conectado. Escribe comandos (B<bit> [0|1], R<num> [val], I<num>, scan, q)")
+    print(f"  Bits R170: 0-{max(BITS.keys())}")
     print(f"  I disponibles: {sorted(INPUTS.keys())}")
     print()
 
