@@ -836,13 +836,13 @@ class CentralTab(QWidget):
         self._pulse_coil(CENTRAL_ROTADOR_HORARIO, "Rotador horario")
 
     def on_banda_atras(self):
-        self._pulse_coil(CENTRAL_BANDA_ATRAS, "Banda atras")
+        self._pulse_coil(CENTRAL_BANDA_ADELANTE, "Banda atras")
 
     def on_banda_stop(self):
         self._pulse_coil(CENTRAL_BANDA_STOP, "Banda detenida")
 
     def on_banda_adelante(self):
-        self._pulse_coil(CENTRAL_BANDA_ADELANTE, "Banda adelante")
+        self._pulse_coil(CENTRAL_BANDA_ATRAS, "Banda adelante")
 
     def on_torreta_verde(self):
         self._write_coil(CENTRAL_TORRETA_VERDE, True, "Torreta verde ON")
@@ -1157,13 +1157,13 @@ class SalidaTab(QWidget):
         self._write_bit(SALIDA_BIT_LED_ROJO, False, "LED rojo OFF")
 
     def on_banda_izq(self):
-        self._write_register(SALIDA_SWITCH_BANDA, 5378, "Banda izquierda")
+        self._write_register(SALIDA_SWITCH_BANDA, 5376, "Banda izquierda")
 
     def on_banda_off(self):
         self._write_register(SALIDA_SWITCH_BANDA, 5377, "Banda detenida")
 
     def on_banda_der(self):
-        self._write_register(SALIDA_SWITCH_BANDA, 5376, "Banda derecha")
+        self._write_register(SALIDA_SWITCH_BANDA, 5378, "Banda derecha")
 
     def on_banda_salida(self, checked):
         self._write_bit(SALIDA_BIT_BANDA_SALIDA, checked, f"Banda salida {'ON' if checked else 'OFF'}")
@@ -1175,10 +1175,10 @@ class SalidaTab(QWidget):
         self._write_bit(SALIDA_BIT_PLUMA_ENTRADA_CERRAR, True, "Pluma entrada cerrada")
 
     def on_pluma_salida_abrir(self):
-        self._pulse_bit(SALIDA_BIT_PLUMA_SALIDA_ABRIR, "Pluma salida sube")
+        self._toggle_bit(SALIDA_BIT_PLUMA_SALIDA_ABRIR, "Pluma salida sube")
 
     def on_pluma_salida_cerrar(self):
-        self._pulse_bit(SALIDA_BIT_PLUMA_SALIDA_CERRAR, "Pluma salida baja")
+        self._toggle_bit(SALIDA_BIT_PLUMA_SALIDA_CERRAR, "Pluma salida baja")
 
     def on_vfd_escribir(self):
         text = self.input_vfd.text().strip()
@@ -1238,10 +1238,12 @@ class SalidaTab(QWidget):
         except Exception as e:
             self.log(f"[SALIDA] Error: {e}")
 
-    def _pulse_bit(self, bit, msg):
+    def _toggle_bit(self, bit, msg):
         try:
-            self._write_bit(bit, True, f"{msg} (pulso)")
-            QTimer.singleShot(100, lambda: self._write_bit(bit, False, f"{msg} OFF"))
+            current = self.manager.read_register_bit(
+                self.PLC_ID, SALIDA_REG_CONTROL, bit)
+            new_state = not current
+            self._write_bit(bit, new_state, f"{msg} → {'ON' if new_state else 'OFF'}")
         except Exception as e:
             self.log(f"[SALIDA] Error: {e}")
 
