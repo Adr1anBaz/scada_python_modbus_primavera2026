@@ -748,14 +748,24 @@ class CentralTab(QWidget):
         self._set_prueba_enabled(False)
 
     def _set_prueba_enabled(self, enabled):
-        for btn in (
-            self.btn_rot_anti, self.btn_rot_stop, self.btn_rot_hora,
-            self.btn_banda_atras, self.btn_banda_stop, self.btn_banda_adelante,
-            self.btn_torr_verde, self.btn_torr_verde_off,
-            self.btn_torr_amarillo, self.btn_torr_amarillo_off,
-            self.btn_torr_rojo, self.btn_torr_rojo_off,
-        ):
+        disabled_style = styled_btn_sm("#bdc3c7", "#6c757d")
+        btn_styles = {
+            self.btn_rot_anti: self._btn_style("#1c7ed6"),
+            self.btn_rot_stop: self._btn_style("#868e96"),
+            self.btn_rot_hora: self._btn_style("#1c7ed6"),
+            self.btn_banda_atras: self._btn_style("#1c7ed6"),
+            self.btn_banda_stop: self._btn_style("#868e96"),
+            self.btn_banda_adelante: self._btn_style("#1c7ed6"),
+            self.btn_torr_verde: styled_btn_sm("#2f9e44"),
+            self.btn_torr_verde_off: styled_btn_sm("#868e96"),
+            self.btn_torr_amarillo: styled_btn_sm("#f08c00"),
+            self.btn_torr_amarillo_off: styled_btn_sm("#868e96"),
+            self.btn_torr_rojo: styled_btn_sm("#e03131"),
+            self.btn_torr_rojo_off: styled_btn_sm("#868e96"),
+        }
+        for btn, active_style in btn_styles.items():
             btn.setEnabled(enabled)
+            btn.setStyleSheet(active_style if enabled else disabled_style)
 
     # --- Acciones de botones ---
 
@@ -834,6 +844,13 @@ class CentralTab(QWidget):
             return
 
         try:
+            prueba_active = self.manager.read_coil(self.PLC_ID, CENTRAL_MODO_PRUEBA)
+            if prueba_active != self.btn_t51.isChecked():
+                self.btn_t51.blockSignals(True)
+                self.btn_t51.setChecked(prueba_active)
+                self.btn_t51.blockSignals(False)
+                self._set_prueba_enabled(prueba_active)
+
             self.led_recibido.update_state(
                 self.manager.read_coil(self.PLC_ID, CENTRAL_PILOTO_RECIBIDO))
             self.led_listo.update_state(
