@@ -633,6 +633,11 @@ class CentralTab(QWidget):
         self.btn_ur3_fin.clicked.connect(self.on_ur3_fin)
         ctrl_layout.addWidget(self.btn_ur3_fin)
 
+        self.btn_banda3_lista = QPushButton("B3 Lista")
+        self.btn_banda3_lista.setStyleSheet(self._btn_style("#7048e8"))
+        self.btn_banda3_lista.clicked.connect(self.on_banda3_lista)
+        ctrl_layout.addWidget(self.btn_banda3_lista)
+
         top_row.addWidget(grp_control)
 
         grp_pilotos = QGroupBox("Pilotos de Estado")
@@ -797,6 +802,9 @@ class CentralTab(QWidget):
 
     def on_ur3_fin(self):
         self._pulse_coil(CENTRAL_UR3_FIN, "Señal: UR3 fin")
+
+    def on_banda3_lista(self):
+        self._pulse_coil(CENTRAL_BANDA3_LISTA, "Señal: Banda 3 lista (T98)")
 
     def on_modo_proceso(self):
         self._pulse_coil(CENTRAL_MODO_PROCESO, "Modo Proceso (T76)")

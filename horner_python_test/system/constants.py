@@ -40,6 +40,7 @@ CENTRAL_STOP = 6048                 # T49 → addr 6048
 CENTRAL_LLEGO_CAJA = 6023          # T24 → addr 6023
 CENTRAL_RECIBIO_BANDA3 = 6027      # T28 → addr 6027
 CENTRAL_UR3_FIN = 6078             # T79 → addr 6078
+CENTRAL_BANDA3_LISTA = 6097        # T98 → addr 6097
 
 # --- Pilotos de estado (lectura) ---
 CENTRAL_PILOTO_RECIBIDO = 6025     # T26 → addr 6025
