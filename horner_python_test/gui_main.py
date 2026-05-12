@@ -748,6 +748,7 @@ class CentralTab(QWidget):
 
     def on_menu(self):
         self._write_coil(CENTRAL_MENU, True, "Menú (T53)")
+        QTimer.singleShot(100, lambda: self._write_coil(CENTRAL_MENU, False, "T53 OFF"))
         self.btn_t51.blockSignals(True)
         self.btn_t51.setChecked(False)
         self.btn_t51.blockSignals(False)
