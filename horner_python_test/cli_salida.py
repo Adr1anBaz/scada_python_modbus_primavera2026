@@ -23,18 +23,19 @@ client = ModbusTcpClient(host=HOST, port=PORT, timeout=3)
 REG_CONTROL = 3169  # R170
 
 BITS = {
-    0: "Int → Proc / Proc → Int",
-    1: "initPru Estado 0→1",
-    2: "Proc → Individual",
-    3: "LED rojo",
-    4: "LED amarillo",
-    5: "STOP/paro",
+    0: "Int → Proc",
+    1: "Proc → Int",
+    2: "initPru Estado 0→1",
+    3: "Proc → Individual",
+    4: "LED rojo",
+    5: "LED amarillo",
     6: "LED verde / abrir pluma entrada",
-    7: "Cerrar pluma entrada",
-    8: "Abrir pluma salida",
-    9: "Cerrar pluma salida",
-    10: "Individual → Proc",
-    11: "Banda salida enclavable",
+    7: "STOP/paro",
+    8: "Cerrar pluma entrada",
+    9: "Abrir pluma salida",
+    10: "Cerrar pluma salida",
+    11: "Individual → Proc",
+    12: "Banda salida enclavable",
 }
 
 INPUTS = {

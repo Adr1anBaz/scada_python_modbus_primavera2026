@@ -145,20 +145,20 @@ ENTRADA_VFD_LEER = 3507               # R508 - leer frecuencia del VFD
 # Las M originales fueron remapeadas como bits de este registro.
 SALIDA_REG_CONTROL = 3169             # R170 → addr 3169
 
-# Bits del registro R170 (recorridos -1):
+# Bits del registro R170:
 SALIDA_BIT_MODO_INT_A_PROC = 0        # R170.0 - Modo Integración → Modo Proceso
-SALIDA_BIT_MODO_PROC_A_INT = 0        # R170.0 - Modo Proceso → Modo Integración
-SALIDA_BIT_INIT_PROCESO = 1           # R170.1 - initPru, pasa Estado 0 a Estado 1
-SALIDA_BIT_MODO_PROC_A_IND = 2        # R170.2 - Modo Proceso → Modo Individual
-SALIDA_BIT_LED_ROJO = 3               # R170.3 - encender LED rojo
-SALIDA_BIT_LED_AMARILLO = 4           # R170.4 - encender LED amarillo
-SALIDA_BIT_STOP = 5                   # R170.5 - stop/paro
+SALIDA_BIT_MODO_PROC_A_INT = 1        # R170.1 - Modo Proceso → Modo Integración
+SALIDA_BIT_INIT_PROCESO = 2           # R170.2 - initPru, pasa Estado 0 a Estado 1
+SALIDA_BIT_MODO_PROC_A_IND = 3        # R170.3 - Modo Proceso → Modo Individual
+SALIDA_BIT_LED_ROJO = 4               # R170.4 - encender LED rojo
+SALIDA_BIT_LED_AMARILLO = 5           # R170.5 - encender LED amarillo
 SALIDA_BIT_LED_VERDE = 6              # R170.6 - encender LED verde / abrir pluma entrada
-SALIDA_BIT_PLUMA_ENTRADA_CERRAR = 7   # R170.7 - cerrar pluma de entrada
-SALIDA_BIT_PLUMA_SALIDA_ABRIR = 8     # R170.8 - abrir pluma de salida
-SALIDA_BIT_PLUMA_SALIDA_CERRAR = 9    # R170.9 - cerrar pluma de salida
-SALIDA_BIT_MODO_IND_A_PROC = 10       # R170.10 - Modo Individual → Modo Proceso
-SALIDA_BIT_BANDA_SALIDA = 11          # R170.11 - control enclavable de banda de salida
+SALIDA_BIT_STOP = 7                   # R170.7 - stop/paro
+SALIDA_BIT_PLUMA_ENTRADA_CERRAR = 8   # R170.8 - cerrar pluma de entrada
+SALIDA_BIT_PLUMA_SALIDA_ABRIR = 9     # R170.9 - abrir pluma de salida
+SALIDA_BIT_PLUMA_SALIDA_CERRAR = 10   # R170.10 - cerrar pluma de salida
+SALIDA_BIT_MODO_IND_A_PROC = 11       # R170.11 - Modo Individual → Modo Proceso
+SALIDA_BIT_BANDA_SALIDA = 12          # R170.12 - control enclavable de banda de salida
 
 # --- Registros directos ---
 SALIDA_VFD_ESCRIBIR = 3497            # R498 → addr 3497
