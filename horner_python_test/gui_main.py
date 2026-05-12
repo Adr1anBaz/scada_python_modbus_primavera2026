@@ -1157,13 +1157,13 @@ class SalidaTab(QWidget):
         self._write_bit(SALIDA_BIT_LED_ROJO, False, "LED rojo OFF")
 
     def on_banda_izq(self):
-        self._write_register(SALIDA_SWITCH_BANDA, 5376, "Banda izquierda")
+        self._write_register(SALIDA_SWITCH_BANDA, 5378, "Banda izquierda")
 
     def on_banda_off(self):
         self._write_register(SALIDA_SWITCH_BANDA, 5377, "Banda detenida")
 
     def on_banda_der(self):
-        self._write_register(SALIDA_SWITCH_BANDA, 5378, "Banda derecha")
+        self._write_register(SALIDA_SWITCH_BANDA, 5376, "Banda derecha")
 
     def on_banda_salida(self, checked):
         self._write_bit(SALIDA_BIT_BANDA_SALIDA, checked, f"Banda salida {'ON' if checked else 'OFF'}")

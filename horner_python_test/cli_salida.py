@@ -23,19 +23,18 @@ client = ModbusTcpClient(host=HOST, port=PORT, timeout=3)
 REG_CONTROL = 3169  # R170
 
 BITS = {
-    0: "Int → Proc (ex-M29)",
-    1: "Proc → Int (ex-M33)",
-    2: "initPru Estado 0→1 (ex-M32)",
-    3: "Proc → Individual (ex-M36)",
-    4: "LED rojo (ex-M46)",
-    5: "LED amarillo (ex-M47)",
-    6: "STOP/paro (ex-M49)",
-    7: "LED verde / abrir pluma entrada (ex-M41)",
-    8: "Cerrar pluma entrada (ex-M42)",
-    9: "Abrir pluma salida (ex-M43)",
-    10: "Cerrar pluma salida (ex-M44)",
-    11: "Individual → Proc (ex-M37)",
-    12: "Banda salida enclavable (ex-M45)",
+    0: "Int → Proc / Proc → Int",
+    1: "initPru Estado 0→1",
+    2: "Proc → Individual",
+    3: "LED rojo",
+    4: "LED amarillo",
+    5: "STOP/paro",
+    6: "LED verde / abrir pluma entrada",
+    7: "Cerrar pluma entrada",
+    8: "Abrir pluma salida",
+    9: "Cerrar pluma salida",
+    10: "Individual → Proc",
+    11: "Banda salida enclavable",
 }
 
 INPUTS = {
@@ -191,7 +190,7 @@ def scan_all():
         (3000, "R1 - Maquina de estados"),
         (3497, "R498 - VFD escribir (in freq)"),
         (3507, "R508 - VFD leer (out freq)"),
-        (3099, "R100 - Switch banda (5376=izq,5377=off,5378=der)"),
+        (3099, "R100 - Switch banda (5378=izq,5377=off,5376=der)"),
     ]
     for addr, desc in regs:
         result = client.read_holding_registers(addr, count=1)
