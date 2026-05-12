@@ -1175,10 +1175,10 @@ class SalidaTab(QWidget):
         self._write_bit(SALIDA_BIT_PLUMA_ENTRADA_CERRAR, True, "Pluma entrada cerrada")
 
     def on_pluma_salida_abrir(self):
-        self._write_bit(SALIDA_BIT_PLUMA_SALIDA_ABRIR, True, "Pluma salida abierta")
+        self._pulse_bit(SALIDA_BIT_PLUMA_SALIDA_ABRIR, "Pluma salida sube")
 
     def on_pluma_salida_cerrar(self):
-        self._write_bit(SALIDA_BIT_PLUMA_SALIDA_CERRAR, True, "Pluma salida cerrada")
+        self._pulse_bit(SALIDA_BIT_PLUMA_SALIDA_CERRAR, "Pluma salida baja")
 
     def on_vfd_escribir(self):
         text = self.input_vfd.text().strip()
@@ -1235,6 +1235,13 @@ class SalidaTab(QWidget):
                 f"[SALIDA] {msg} | "
                 f"{register_bit_label(SALIDA_REG_CONTROL, bit)}={state_text}"
             )
+        except Exception as e:
+            self.log(f"[SALIDA] Error: {e}")
+
+    def _pulse_bit(self, bit, msg):
+        try:
+            self._write_bit(bit, True, f"{msg} (pulso)")
+            QTimer.singleShot(100, lambda: self._write_bit(bit, False, f"{msg} OFF"))
         except Exception as e:
             self.log(f"[SALIDA] Error: {e}")
 
