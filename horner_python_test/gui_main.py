@@ -564,10 +564,36 @@ class CentralTab(QWidget):
         conn_row.addStretch()
         layout.addLayout(conn_row)
 
-        # --- Fila superior: Control + Pilotos ---
+        # --- Fila superior: Modos + Control + Pilotos ---
         top_row = QHBoxLayout()
 
-        grp_control = QGroupBox("Control")
+        grp_modos = QGroupBox("Navegación")
+        modos_layout = QHBoxLayout(grp_modos)
+
+        self.btn_modo_proceso = QPushButton("Proceso")
+        self.btn_modo_proceso.setStyleSheet(self._btn_style("#2f9e44"))
+        self.btn_modo_proceso.clicked.connect(self.on_modo_proceso)
+        modos_layout.addWidget(self.btn_modo_proceso)
+
+        self.btn_modo_integracion = QPushButton("Integración")
+        self.btn_modo_integracion.setStyleSheet(self._btn_style("#1c7ed6"))
+        self.btn_modo_integracion.clicked.connect(self.on_modo_integracion)
+        modos_layout.addWidget(self.btn_modo_integracion)
+
+        self.btn_t51 = QPushButton("Prueba")
+        self.btn_t51.setCheckable(True)
+        self.btn_t51.setStyleSheet(self._btn_style("#7048e8"))
+        self.btn_t51.toggled.connect(self.on_modo_prueba)
+        modos_layout.addWidget(self.btn_t51)
+
+        self.btn_menu = QPushButton("Menú")
+        self.btn_menu.setStyleSheet(self._btn_style("#868e96"))
+        self.btn_menu.clicked.connect(self.on_menu)
+        modos_layout.addWidget(self.btn_menu)
+
+        top_row.addWidget(grp_modos)
+
+        grp_control = QGroupBox("Control (Proceso/Integración)")
         ctrl_layout = QHBoxLayout(grp_control)
 
         self.btn_stop = QPushButton("STOP")
@@ -590,17 +616,6 @@ class CentralTab(QWidget):
         self.btn_ur3_fin.clicked.connect(self.on_ur3_fin)
         ctrl_layout.addWidget(self.btn_ur3_fin)
 
-        self.btn_t51 = QPushButton("Modo Prueba")
-        self.btn_t51.setCheckable(True)
-        self.btn_t51.setStyleSheet(self._btn_style("#7048e8"))
-        self.btn_t51.toggled.connect(self.on_modo_prueba)
-        ctrl_layout.addWidget(self.btn_t51)
-
-        self.btn_menu = QPushButton("Menú")
-        self.btn_menu.setStyleSheet(self._btn_style("#868e96"))
-        self.btn_menu.clicked.connect(self.on_menu)
-        ctrl_layout.addWidget(self.btn_menu)
-
         top_row.addWidget(grp_control)
 
         grp_pilotos = QGroupBox("Pilotos de Estado")
@@ -617,10 +632,10 @@ class CentralTab(QWidget):
         top_row.addWidget(grp_pilotos)
         layout.addLayout(top_row)
 
-        # --- Fila media: Rotador + Banda ---
+        # --- Fila media: Rotador + Banda (solo modo prueba) ---
         mid_row = QHBoxLayout()
 
-        grp_rotador = QGroupBox("Rotador")
+        grp_rotador = QGroupBox("Rotador (Modo Prueba)")
         rot_layout = QHBoxLayout(grp_rotador)
 
         self.btn_rot_anti = QPushButton("Antihorario")
@@ -640,7 +655,7 @@ class CentralTab(QWidget):
 
         mid_row.addWidget(grp_rotador)
 
-        grp_banda = QGroupBox("Banda")
+        grp_banda = QGroupBox("Banda (Modo Prueba)")
         banda_layout = QHBoxLayout(grp_banda)
 
         self.btn_banda_atras = QPushButton("Atras")
@@ -729,6 +744,19 @@ class CentralTab(QWidget):
         bot_row.addWidget(grp_diag)
         layout.addLayout(bot_row)
 
+        # --- Botones de modo prueba empiezan deshabilitados ---
+        self._set_prueba_enabled(False)
+
+    def _set_prueba_enabled(self, enabled):
+        for btn in (
+            self.btn_rot_anti, self.btn_rot_stop, self.btn_rot_hora,
+            self.btn_banda_atras, self.btn_banda_stop, self.btn_banda_adelante,
+            self.btn_torr_verde, self.btn_torr_verde_off,
+            self.btn_torr_amarillo, self.btn_torr_amarillo_off,
+            self.btn_torr_rojo, self.btn_torr_rojo_off,
+        ):
+            btn.setEnabled(enabled)
+
     # --- Acciones de botones ---
 
     def on_stop(self):
@@ -743,8 +771,15 @@ class CentralTab(QWidget):
     def on_ur3_fin(self):
         self._pulse_coil(CENTRAL_UR3_FIN, "Señal: UR3 fin")
 
+    def on_modo_proceso(self):
+        self._pulse_coil(CENTRAL_MODO_PROCESO, "Modo Proceso (T76)")
+
+    def on_modo_integracion(self):
+        self._pulse_coil(CENTRAL_MODO_INTEGRACION, "Modo Integración (T70)")
+
     def on_modo_prueba(self, checked):
         self._write_coil(CENTRAL_MODO_PRUEBA, checked, f"T51 {'ON' if checked else 'OFF'}")
+        self._set_prueba_enabled(checked)
 
     def on_menu(self):
         self._write_coil(CENTRAL_MENU, True, "Menú (T53)")
@@ -753,6 +788,7 @@ class CentralTab(QWidget):
         self.btn_t51.setChecked(False)
         self.btn_t51.blockSignals(False)
         self._write_coil(CENTRAL_MODO_PRUEBA, False, "T51 OFF (regreso a menú)")
+        self._set_prueba_enabled(False)
 
     def on_rotador_anti(self):
         self._pulse_coil(CENTRAL_ROTADOR_ANTIHORARIO, "Rotador antihorario")
