@@ -35,12 +35,12 @@ class PLCManager(EventEmitter):
     def initialize(self) -> Dict[str, bool]:
         """
         Inicializa todos los PLCs definidos en la configuración.
-        
+
         Returns:
             Dict con plc_id -> estado de conexión (True/False)
         """
         results = {}
-        
+
         for plc_config in self.config.get_all_plcs():
             device = PLCDevice(
                 plc_id=plc_config.id,
@@ -48,9 +48,9 @@ class PLCManager(EventEmitter):
                 port=plc_config.port,
                 timeout=plc_config.timeout
             )
-            
+
             # Reemitir eventos del dispositivo
-            device.on("plc_connected", 
+            device.on("plc_connected",
                      lambda plc_id=plc_config.id: self.emit("plc_connected", plc_id=plc_id))
             device.on("plc_disconnected",
                      lambda plc_id=plc_config.id: self.emit("plc_disconnected", plc_id=plc_id))
@@ -66,12 +66,54 @@ class PLCManager(EventEmitter):
                      lambda address, value, plc_id=plc_config.id: self.emit("register_read", plc_id=plc_id, address=address, value=value))
             device.on("register_written",
                      lambda address, value, plc_id=plc_config.id: self.emit("register_written", plc_id=plc_id, address=address, value=value))
-            
+
             self.devices[plc_config.id] = device
             results[plc_config.id] = device.connect()
-        
+
         return results
-    
+
+    def create_devices(self) -> None:
+        """Crea los objetos de dispositivo sin conectarlos."""
+        for plc_config in self.config.get_all_plcs():
+            if plc_config.id in self.devices:
+                continue
+
+            device = PLCDevice(
+                plc_id=plc_config.id,
+                host=plc_config.host,
+                port=plc_config.port,
+                timeout=plc_config.timeout
+            )
+
+            device.on("plc_connected",
+                     lambda plc_id=plc_config.id: self.emit("plc_connected", plc_id=plc_id))
+            device.on("plc_disconnected",
+                     lambda plc_id=plc_config.id: self.emit("plc_disconnected", plc_id=plc_id))
+            device.on("plc_error",
+                     lambda error, plc_id=plc_config.id: self.emit("plc_error", plc_id=plc_id, error=error))
+            device.on("coil_read",
+                     lambda address, value, plc_id=plc_config.id: self.emit("coil_read", plc_id=plc_id, address=address, value=value))
+            device.on("coil_written",
+                     lambda address, value, plc_id=plc_config.id: self.emit("coil_written", plc_id=plc_id, address=address, value=value))
+            device.on("input_read",
+                     lambda address, value, plc_id=plc_config.id: self.emit("input_read", plc_id=plc_id, address=address, value=value))
+            device.on("register_read",
+                     lambda address, value, plc_id=plc_config.id: self.emit("register_read", plc_id=plc_id, address=address, value=value))
+            device.on("register_written",
+                     lambda address, value, plc_id=plc_config.id: self.emit("register_written", plc_id=plc_id, address=address, value=value))
+
+            self.devices[plc_config.id] = device
+
+    def connect_device(self, plc_id: str) -> bool:
+        """Conecta un PLC individual."""
+        self.create_devices()
+        return self.get_device(plc_id).connect()
+
+    def disconnect_device(self, plc_id: str) -> None:
+        """Desconecta un PLC individual."""
+        if plc_id in self.devices:
+            self.devices[plc_id].disconnect()
+
     def shutdown(self) -> None:
         """Desconecta todos los PLCs."""
         for device in self.devices.values():

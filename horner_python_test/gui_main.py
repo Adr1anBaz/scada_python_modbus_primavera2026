@@ -129,6 +129,14 @@ def styled_btn(color, text_color="#ffffff"):
     )
 
 
+def styled_btn_sm(color, text_color="#ffffff"):
+    return (
+        f"background-color: {color}; color: {text_color}; "
+        f"border: none; border-radius: 4px; padding: 4px 10px; "
+        f"font-size: 10px; font-weight: bold; min-width: 36px; min-height: 22px;"
+    )
+
+
 def coil_label(address: int) -> str:
     if 6000 <= address < 7000:
         return f"T{address - 6000} ({address})"
@@ -201,6 +209,19 @@ class EntradaTab(QWidget):
     def setup_ui(self):
         layout = QVBoxLayout(self)
 
+        # --- Conexión individual ---
+        conn_row = QHBoxLayout()
+        self.btn_connect = QPushButton("CONECTAR")
+        self.btn_connect.setStyleSheet(styled_btn("#4263eb"))
+        self.btn_connect.clicked.connect(self.toggle_connection)
+        conn_row.addWidget(self.btn_connect)
+        self.lbl_status = QLabel("DESCONECTADO")
+        self.lbl_status.setFont(QFont("Segoe UI", 9, QFont.Bold))
+        self.lbl_status.setStyleSheet("color: #e03131;")
+        conn_row.addWidget(self.lbl_status)
+        conn_row.addStretch()
+        layout.addLayout(conn_row)
+
         # --- Fila 1: Control + Lamparas + Torreta ---
         top_row = QHBoxLayout()
 
@@ -233,31 +254,31 @@ class EntradaTab(QWidget):
         torreta_layout = QGridLayout(grp_torreta)
         torreta_layout.addWidget(QLabel("Verde:"), 0, 0)
         self.btn_torr_verde = QPushButton("ON")
-        self.btn_torr_verde.setStyleSheet(self._btn_style("#2f9e44"))
+        self.btn_torr_verde.setStyleSheet(styled_btn_sm("#2f9e44"))
         self.btn_torr_verde.clicked.connect(self.on_torreta_verde)
         torreta_layout.addWidget(self.btn_torr_verde, 0, 1)
         self.btn_torr_verde_off = QPushButton("OFF")
-        self.btn_torr_verde_off.setStyleSheet(self._btn_style("#868e96"))
+        self.btn_torr_verde_off.setStyleSheet(styled_btn_sm("#868e96"))
         self.btn_torr_verde_off.clicked.connect(self.on_torreta_verde_off)
         torreta_layout.addWidget(self.btn_torr_verde_off, 0, 2)
 
         torreta_layout.addWidget(QLabel("Amarillo:"), 1, 0)
         self.btn_torr_amarilla = QPushButton("ON")
-        self.btn_torr_amarilla.setStyleSheet(self._btn_style("#f08c00"))
+        self.btn_torr_amarilla.setStyleSheet(styled_btn_sm("#f08c00"))
         self.btn_torr_amarilla.clicked.connect(self.on_torreta_amarilla)
         torreta_layout.addWidget(self.btn_torr_amarilla, 1, 1)
         self.btn_torr_amarilla_off = QPushButton("OFF")
-        self.btn_torr_amarilla_off.setStyleSheet(self._btn_style("#868e96"))
+        self.btn_torr_amarilla_off.setStyleSheet(styled_btn_sm("#868e96"))
         self.btn_torr_amarilla_off.clicked.connect(self.on_torreta_amarilla_off)
         torreta_layout.addWidget(self.btn_torr_amarilla_off, 1, 2)
 
         torreta_layout.addWidget(QLabel("Roja:"), 2, 0)
         self.btn_torr_roja = QPushButton("ON")
-        self.btn_torr_roja.setStyleSheet(self._btn_style("#e03131"))
+        self.btn_torr_roja.setStyleSheet(styled_btn_sm("#e03131"))
         self.btn_torr_roja.clicked.connect(self.on_torreta_roja)
         torreta_layout.addWidget(self.btn_torr_roja, 2, 1)
         self.btn_torr_roja_off = QPushButton("OFF")
-        self.btn_torr_roja_off.setStyleSheet(self._btn_style("#868e96"))
+        self.btn_torr_roja_off.setStyleSheet(styled_btn_sm("#868e96"))
         self.btn_torr_roja_off.clicked.connect(self.on_torreta_roja_off)
         torreta_layout.addWidget(self.btn_torr_roja_off, 2, 2)
         top_row.addWidget(grp_torreta)
@@ -485,6 +506,32 @@ class EntradaTab(QWidget):
         except Exception as e:
             self.log(f"[ENTRADA] Error: {e}")
 
+    def toggle_connection(self):
+        if not self.connected:
+            try:
+                result = self.manager.connect_device(self.PLC_ID)
+                self.connected = result
+                if result:
+                    self.btn_connect.setText("DESCONECTAR")
+                    self.btn_connect.setStyleSheet(styled_btn("#e03131"))
+                    self.lbl_status.setText("ONLINE")
+                    self.lbl_status.setStyleSheet("color: #2f9e44;")
+                    self.log(f"[ENTRADA] Conectado a {self.PLC_ID}")
+                else:
+                    self.lbl_status.setText("FALLO")
+                    self.lbl_status.setStyleSheet("color: #e03131;")
+                    self.log(f"[ENTRADA] No se pudo conectar a {self.PLC_ID}")
+            except Exception as e:
+                self.log(f"[ENTRADA] Error conectando: {e}")
+        else:
+            self.manager.disconnect_device(self.PLC_ID)
+            self.connected = False
+            self.btn_connect.setText("CONECTAR")
+            self.btn_connect.setStyleSheet(styled_btn("#4263eb"))
+            self.lbl_status.setText("DESCONECTADO")
+            self.lbl_status.setStyleSheet("color: #e03131;")
+            self.log(f"[ENTRADA] Desconectado de {self.PLC_ID}")
+
     def _btn_style(self, color):
         return styled_btn(color)
 
@@ -503,6 +550,19 @@ class CentralTab(QWidget):
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
+
+        # --- Conexión individual ---
+        conn_row = QHBoxLayout()
+        self.btn_connect = QPushButton("CONECTAR")
+        self.btn_connect.setStyleSheet(styled_btn("#4263eb"))
+        self.btn_connect.clicked.connect(self.toggle_connection)
+        conn_row.addWidget(self.btn_connect)
+        self.lbl_status = QLabel("DESCONECTADO")
+        self.lbl_status.setFont(QFont("Segoe UI", 9, QFont.Bold))
+        self.lbl_status.setStyleSheet("color: #e03131;")
+        conn_row.addWidget(self.lbl_status)
+        conn_row.addStretch()
+        layout.addLayout(conn_row)
 
         # --- Fila superior: Control + Pilotos ---
         top_row = QHBoxLayout()
@@ -604,31 +664,31 @@ class CentralTab(QWidget):
 
         torreta_layout.addWidget(QLabel("Verde:"), 0, 0)
         self.btn_torr_verde = QPushButton("ON")
-        self.btn_torr_verde.setStyleSheet(self._btn_style("#2f9e44"))
+        self.btn_torr_verde.setStyleSheet(styled_btn_sm("#2f9e44"))
         self.btn_torr_verde.clicked.connect(self.on_torreta_verde)
         torreta_layout.addWidget(self.btn_torr_verde, 0, 1)
         self.btn_torr_verde_off = QPushButton("OFF")
-        self.btn_torr_verde_off.setStyleSheet(self._btn_style("#868e96"))
+        self.btn_torr_verde_off.setStyleSheet(styled_btn_sm("#868e96"))
         self.btn_torr_verde_off.clicked.connect(self.on_torreta_verde_off)
         torreta_layout.addWidget(self.btn_torr_verde_off, 0, 2)
 
         torreta_layout.addWidget(QLabel("Amarillo:"), 1, 0)
         self.btn_torr_amarillo = QPushButton("ON")
-        self.btn_torr_amarillo.setStyleSheet(self._btn_style("#f08c00"))
+        self.btn_torr_amarillo.setStyleSheet(styled_btn_sm("#f08c00"))
         self.btn_torr_amarillo.clicked.connect(self.on_torreta_amarillo)
         torreta_layout.addWidget(self.btn_torr_amarillo, 1, 1)
         self.btn_torr_amarillo_off = QPushButton("OFF")
-        self.btn_torr_amarillo_off.setStyleSheet(self._btn_style("#868e96"))
+        self.btn_torr_amarillo_off.setStyleSheet(styled_btn_sm("#868e96"))
         self.btn_torr_amarillo_off.clicked.connect(self.on_torreta_amarillo_off)
         torreta_layout.addWidget(self.btn_torr_amarillo_off, 1, 2)
 
         torreta_layout.addWidget(QLabel("Rojo:"), 2, 0)
         self.btn_torr_rojo = QPushButton("ON")
-        self.btn_torr_rojo.setStyleSheet(self._btn_style("#e03131"))
+        self.btn_torr_rojo.setStyleSheet(styled_btn_sm("#e03131"))
         self.btn_torr_rojo.clicked.connect(self.on_torreta_rojo)
         torreta_layout.addWidget(self.btn_torr_rojo, 2, 1)
         self.btn_torr_rojo_off = QPushButton("OFF")
-        self.btn_torr_rojo_off.setStyleSheet(self._btn_style("#868e96"))
+        self.btn_torr_rojo_off.setStyleSheet(styled_btn_sm("#868e96"))
         self.btn_torr_rojo_off.clicked.connect(self.on_torreta_rojo_off)
         torreta_layout.addWidget(self.btn_torr_rojo_off, 2, 2)
 
@@ -763,6 +823,32 @@ class CentralTab(QWidget):
         except Exception as e:
             self.log(f"[CENTRAL] Error: {e}")
 
+    def toggle_connection(self):
+        if not self.connected:
+            try:
+                result = self.manager.connect_device(self.PLC_ID)
+                self.connected = result
+                if result:
+                    self.btn_connect.setText("DESCONECTAR")
+                    self.btn_connect.setStyleSheet(styled_btn("#e03131"))
+                    self.lbl_status.setText("ONLINE")
+                    self.lbl_status.setStyleSheet("color: #2f9e44;")
+                    self.log(f"[CENTRAL] Conectado a {self.PLC_ID}")
+                else:
+                    self.lbl_status.setText("FALLO")
+                    self.lbl_status.setStyleSheet("color: #e03131;")
+                    self.log(f"[CENTRAL] No se pudo conectar a {self.PLC_ID}")
+            except Exception as e:
+                self.log(f"[CENTRAL] Error conectando: {e}")
+        else:
+            self.manager.disconnect_device(self.PLC_ID)
+            self.connected = False
+            self.btn_connect.setText("CONECTAR")
+            self.btn_connect.setStyleSheet(styled_btn("#4263eb"))
+            self.lbl_status.setText("DESCONECTADO")
+            self.lbl_status.setStyleSheet("color: #e03131;")
+            self.log(f"[CENTRAL] Desconectado de {self.PLC_ID}")
+
     def _btn_style(self, color):
         return styled_btn(color)
 
@@ -781,6 +867,19 @@ class SalidaTab(QWidget):
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
+
+        # --- Conexión individual ---
+        conn_row = QHBoxLayout()
+        self.btn_connect = QPushButton("CONECTAR")
+        self.btn_connect.setStyleSheet(styled_btn("#4263eb"))
+        self.btn_connect.clicked.connect(self.toggle_connection)
+        conn_row.addWidget(self.btn_connect)
+        self.lbl_status = QLabel("DESCONECTADO")
+        self.lbl_status.setFont(QFont("Segoe UI", 9, QFont.Bold))
+        self.lbl_status.setStyleSheet("color: #e03131;")
+        conn_row.addWidget(self.lbl_status)
+        conn_row.addStretch()
+        layout.addLayout(conn_row)
 
         # --- Fila superior: Control + LEDs ---
         top_row = QHBoxLayout()
@@ -805,31 +904,31 @@ class SalidaTab(QWidget):
 
         leds_layout.addWidget(QLabel("Verde:"), 0, 0)
         self.btn_led_verde = QPushButton("ON")
-        self.btn_led_verde.setStyleSheet(self._btn_style("#2f9e44"))
+        self.btn_led_verde.setStyleSheet(styled_btn_sm("#2f9e44"))
         self.btn_led_verde.clicked.connect(self.on_led_verde)
         leds_layout.addWidget(self.btn_led_verde, 0, 1)
         self.btn_led_verde_off = QPushButton("OFF")
-        self.btn_led_verde_off.setStyleSheet(self._btn_style("#868e96"))
+        self.btn_led_verde_off.setStyleSheet(styled_btn_sm("#868e96"))
         self.btn_led_verde_off.clicked.connect(self.on_led_verde_off)
         leds_layout.addWidget(self.btn_led_verde_off, 0, 2)
 
         leds_layout.addWidget(QLabel("Amarillo:"), 1, 0)
         self.btn_led_amarillo = QPushButton("ON")
-        self.btn_led_amarillo.setStyleSheet(self._btn_style("#f08c00"))
+        self.btn_led_amarillo.setStyleSheet(styled_btn_sm("#f08c00"))
         self.btn_led_amarillo.clicked.connect(self.on_led_amarillo)
         leds_layout.addWidget(self.btn_led_amarillo, 1, 1)
         self.btn_led_amarillo_off = QPushButton("OFF")
-        self.btn_led_amarillo_off.setStyleSheet(self._btn_style("#868e96"))
+        self.btn_led_amarillo_off.setStyleSheet(styled_btn_sm("#868e96"))
         self.btn_led_amarillo_off.clicked.connect(self.on_led_amarillo_off)
         leds_layout.addWidget(self.btn_led_amarillo_off, 1, 2)
 
         leds_layout.addWidget(QLabel("Rojo:"), 2, 0)
         self.btn_led_rojo = QPushButton("ON")
-        self.btn_led_rojo.setStyleSheet(self._btn_style("#e03131"))
+        self.btn_led_rojo.setStyleSheet(styled_btn_sm("#e03131"))
         self.btn_led_rojo.clicked.connect(self.on_led_rojo)
         leds_layout.addWidget(self.btn_led_rojo, 2, 1)
         self.btn_led_rojo_off = QPushButton("OFF")
-        self.btn_led_rojo_off.setStyleSheet(self._btn_style("#868e96"))
+        self.btn_led_rojo_off.setStyleSheet(styled_btn_sm("#868e96"))
         self.btn_led_rojo_off.clicked.connect(self.on_led_rojo_off)
         leds_layout.addWidget(self.btn_led_rojo_off, 2, 2)
 
@@ -985,7 +1084,7 @@ class SalidaTab(QWidget):
         self._write_bit(SALIDA_BIT_BANDA_SALIDA, checked, f"Banda salida {'ON' if checked else 'OFF'}")
 
     def on_pluma_entrada_abrir(self):
-        self._write_bit(SALIDA_BIT_LED_VERDE, True, "Pluma entrada abierta")
+        self._write_bit(SALIDA_BIT_LED_VERDE, True, "Pluma entrada abierta (M41)")
 
     def on_pluma_entrada_cerrar(self):
         self._write_bit(SALIDA_BIT_PLUMA_ENTRADA_CERRAR, True, "Pluma entrada cerrada")
@@ -1061,6 +1160,32 @@ class SalidaTab(QWidget):
         except Exception as e:
             self.log(f"[SALIDA] Error: {e}")
 
+    def toggle_connection(self):
+        if not self.connected:
+            try:
+                result = self.manager.connect_device(self.PLC_ID)
+                self.connected = result
+                if result:
+                    self.btn_connect.setText("DESCONECTAR")
+                    self.btn_connect.setStyleSheet(styled_btn("#e03131"))
+                    self.lbl_status.setText("ONLINE")
+                    self.lbl_status.setStyleSheet("color: #2f9e44;")
+                    self.log(f"[SALIDA] Conectado a {self.PLC_ID}")
+                else:
+                    self.lbl_status.setText("FALLO")
+                    self.lbl_status.setStyleSheet("color: #e03131;")
+                    self.log(f"[SALIDA] No se pudo conectar a {self.PLC_ID}")
+            except Exception as e:
+                self.log(f"[SALIDA] Error conectando: {e}")
+        else:
+            self.manager.disconnect_device(self.PLC_ID)
+            self.connected = False
+            self.btn_connect.setText("CONECTAR")
+            self.btn_connect.setStyleSheet(styled_btn("#4263eb"))
+            self.lbl_status.setText("DESCONECTADO")
+            self.lbl_status.setStyleSheet("color: #e03131;")
+            self.log(f"[SALIDA] Desconectado de {self.PLC_ID}")
+
     def _btn_style(self, color):
         return styled_btn(color)
 
@@ -1079,7 +1204,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout(central_widget)
 
-        # Header con título y estado
+        # Header con título
         header = QHBoxLayout()
 
         title = QLabel("SCADA CONTROL")
@@ -1088,16 +1213,6 @@ class MainWindow(QMainWindow):
         header.addWidget(title)
 
         header.addStretch()
-
-        self.lbl_status = QLabel("DESCONECTADO")
-        self.lbl_status.setFont(QFont("Segoe UI", 10, QFont.Bold))
-        self.lbl_status.setStyleSheet("color: #e03131;")
-        header.addWidget(self.lbl_status)
-
-        self.btn_connect = QPushButton("CONECTAR")
-        self.btn_connect.setStyleSheet(styled_btn("#4263eb"))
-        self.btn_connect.clicked.connect(self.toggle_connection)
-        header.addWidget(self.btn_connect)
 
         self.btn_reset = QPushButton("RESET")
         self.btn_reset.setStyleSheet(styled_btn("#f08c00"))
@@ -1129,49 +1244,9 @@ class MainWindow(QMainWindow):
         # Timer de polling
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.refresh_all)
+        self.timer.start(500)
 
-        self.log_message("Sistema listo. Presiona 'Conectar' para iniciar.")
-
-    def toggle_connection(self):
-        if self.btn_connect.text() == "CONECTAR":
-            self.log_message("Conectando a PLCs...")
-            try:
-                results = self.manager.initialize()
-                connected_count = sum(1 for v in results.values() if v)
-                total = len(results)
-
-                self.tab_entrada.connected = results.get("HORNER_2", False)
-                self.tab_central.connected = results.get("HORNER_3", False)
-                self.tab_salida.connected = results.get("HORNER_1", False)
-
-                if connected_count > 0:
-                    self.lbl_status.setText(f"ONLINE {connected_count}/{total}")
-                    self.lbl_status.setStyleSheet("color: #2f9e44;")
-                    self.btn_connect.setText("DESCONECTAR")
-                    self.btn_connect.setStyleSheet(styled_btn("#e03131"))
-                    self.timer.start(500)
-                    self.log_message(f"Conexion exitosa: {connected_count}/{total} PLCs")
-                else:
-                    self.lbl_status.setText("SIN CONEXION")
-                    self.lbl_status.setStyleSheet("color: #e03131;")
-                    self.log_message("No se pudo conectar a ningún PLC")
-
-                for plc_id, status in results.items():
-                    self.log_message(f"  {plc_id}: {'OK' if status else 'FALLO'}")
-
-            except Exception as e:
-                self.log_message(f"Error de conexión: {e}")
-        else:
-            self.timer.stop()
-            self.manager.shutdown()
-            self.tab_entrada.connected = False
-            self.tab_central.connected = False
-            self.tab_salida.connected = False
-            self.lbl_status.setText("DESCONECTADO")
-            self.lbl_status.setStyleSheet("color: #e03131;")
-            self.btn_connect.setText("CONECTAR")
-            self.btn_connect.setStyleSheet(styled_btn("#4263eb"))
-            self.log_message("Desconectado de todos los PLCs")
+        self.log_message("Sistema listo. Conecta cada PLC individualmente.")
 
     def refresh_all(self):
         self.tab_entrada.refresh()
@@ -1253,7 +1328,9 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         self.timer.stop()
-        self.manager.shutdown()
+        for tab in (self.tab_entrada, self.tab_central, self.tab_salida):
+            if tab.connected:
+                self.manager.disconnect_device(tab.PLC_ID)
         event.accept()
 
 
