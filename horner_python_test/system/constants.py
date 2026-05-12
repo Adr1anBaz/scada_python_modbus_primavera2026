@@ -25,45 +25,47 @@ DEFAULT_PORT = 502   # Puerto estándar Modbus TCP
 # =============================================================================
 
 # --- Navegación HMI (solo cambian pantalla, no afectan actuadores) ---
-# CENTRAL_MODO_PROCESO = 6076       # T76 - ir a pestaña proceso + señal init
-# CENTRAL_MODO_INTEGRACION = 6070   # T70 - ir a modo integración + señal init
-CENTRAL_MODO_PRUEBA = 6051          # T51 - ir a modo prueba (enclavable)
-# CENTRAL_MENU = 6053               # T53 - regresar al menú principal
+# NOTA: Offset -1 aplicado. Horner T-markers son 1-indexed pero Modbus es 0-indexed.
+# Fórmula real: T_n = 5999 + n
+CENTRAL_MODO_PROCESO = 6075         # T76 → addr 6075
+CENTRAL_MODO_INTEGRACION = 6069     # T70 → addr 6069
+CENTRAL_MODO_PRUEBA = 6050          # T51 → addr 6050
+CENTRAL_MENU = 6052                 # T53 → addr 6052
 
 # --- Control general ---
-CENTRAL_STOP = 6049                 # T49 - STOP, frena todo el sistema
+CENTRAL_STOP = 6048                 # T49 → addr 6048
 
 # --- Señales de proceso / integración ---
-CENTRAL_LLEGO_CAJA = 6024          # T24 - señal de banda 1: está por mandar caja
-CENTRAL_RECIBIO_BANDA3 = 6028      # T28 - señal de banda 3: recibió la caja (gira antihorario)
-CENTRAL_UR3_FIN = 6079             # T79 - señal del UR3 en integración (gira horario después)
+CENTRAL_LLEGO_CAJA = 6023          # T24 → addr 6023
+CENTRAL_RECIBIO_BANDA3 = 6027      # T28 → addr 6027
+CENTRAL_UR3_FIN = 6078             # T79 → addr 6078
 
 # --- Pilotos de estado (lectura) ---
-CENTRAL_PILOTO_RECIBIDO = 6026     # T26 - piloto: recibió caja / sensor entrada da 1
-CENTRAL_PILOTO_LISTO = 6034        # T34 - piloto: sistema listo para nueva caja
+CENTRAL_PILOTO_RECIBIDO = 6025     # T26 → addr 6025
+CENTRAL_PILOTO_LISTO = 6033        # T34 → addr 6033
 
 # --- Modo prueba: control de rotador ---
-CENTRAL_ROTADOR_ANTIHORARIO = 6063  # T63 - girar rotador sentido antihorario
-CENTRAL_ROTADOR_HORARIO = 6054     # T54 - girar rotador sentido horario
-CENTRAL_ROTADOR_STOP = 6056        # T56 - detener giro del rotador
+CENTRAL_ROTADOR_ANTIHORARIO = 6062  # T63 → addr 6062
+CENTRAL_ROTADOR_HORARIO = 6054     # T55 → addr 6054
+CENTRAL_ROTADOR_STOP = 6055        # T56 → addr 6055
 
 # --- Modo prueba: control de banda ---
-CENTRAL_BANDA_ADELANTE = 6057      # T57 - avance banda hacia adelante
-CENTRAL_BANDA_ATRAS = 6058         # T58 - avance banda hacia atrás
-CENTRAL_BANDA_STOP = 6059          # T59 - detener banda
+CENTRAL_BANDA_ADELANTE = 6056      # T57 → addr 6056
+CENTRAL_BANDA_ATRAS = 6057         # T58 → addr 6057
+CENTRAL_BANDA_STOP = 6058          # T59 → addr 6058
 
 # --- Modo prueba: torreta ---
-CENTRAL_TORRETA_VERDE = 6060       # T60 - torreta piloto verde
-CENTRAL_TORRETA_AMARILLO = 6061    # T61 - torreta piloto amarillo
-CENTRAL_TORRETA_ROJO = 6055        # T55 - torreta piloto rojo
+CENTRAL_TORRETA_VERDE = 6059       # T60 → addr 6059
+CENTRAL_TORRETA_AMARILLO = 6060    # T61 → addr 6060
+CENTRAL_TORRETA_ROJO = 6053        # T54 → addr 6053
 
 # --- Modo prueba: pilotos de diagnóstico (lectura) ---
-CENTRAL_PILOTO_SENSOR_SALIDA = 6064   # T64 - sensor de salida
-CENTRAL_PILOTO_SENSOR_ENTRADA = 6065  # T65 - sensor de entrada
-CENTRAL_PILOTO_SENSOR_GIRO = 6066     # T66 - sensor de fin de giro
-CENTRAL_PILOTO_BOTON_VERDE = 6067     # T67 - botón verde
-CENTRAL_PILOTO_BOTON_ROJO = 6068      # T68 - botón rojo
-CENTRAL_PILOTO_BOTON_PARO = 6069      # T69 - botón de paro
+CENTRAL_PILOTO_SENSOR_SALIDA = 6063   # T64 → addr 6063
+CENTRAL_PILOTO_SENSOR_ENTRADA = 6064  # T65 → addr 6064
+CENTRAL_PILOTO_SENSOR_GIRO = 6065     # T66 → addr 6065
+CENTRAL_PILOTO_BOTON_VERDE = 6066     # T67 → addr 6066
+CENTRAL_PILOTO_BOTON_ROJO = 6067      # T68 → addr 6067
+CENTRAL_PILOTO_BOTON_PARO = 6068      # T69 → addr 6068
 
 
 # =============================================================================

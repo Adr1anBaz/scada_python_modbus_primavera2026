@@ -92,43 +92,44 @@ def parse_command(cmd: str):
 
 
 def scan_coils():
+    # Addresses con offset -1 aplicado (T_n → addr 5999+n)
+    # El tuple es (addr_real, "T<num_pdf> - descripcion")
     known = [
-        (51, "Modo Prueba"),
-        (76, "Modo Proceso"),
-        (70, "Modo Integracion"),
-        (49, "STOP"),
-        (24, "Llego caja"),
-        (28, "Recibio banda 3"),
-        (79, "UR3 fin"),
-        (26, "Piloto recibido"),
-        (34, "Piloto listo"),
-        (63, "Rotador antihorario"),
-        (55, "Rotador horario"),
-        (56, "Rotador stop"),
-        (57, "Banda adelante"),
-        (58, "Banda atras"),
-        (59, "Banda stop"),
-        (60, "Torreta verde"),
-        (61, "Torreta amarillo"),
-        (54, "Torreta rojo"),
-        (53, "Menu"),
-        (64, "Piloto sen. salida"),
-        (65, "Piloto sen. entrada"),
-        (66, "Piloto sen. giro"),
-        (67, "Piloto btn verde"),
-        (68, "Piloto btn rojo"),
-        (69, "Piloto btn paro"),
+        (6050, "T51 Modo Prueba"),
+        (6075, "T76 Modo Proceso"),
+        (6069, "T70 Modo Integracion"),
+        (6052, "T53 Menu"),
+        (6048, "T49 STOP"),
+        (6023, "T24 Llego caja"),
+        (6027, "T28 Recibio banda 3"),
+        (6078, "T79 UR3 fin"),
+        (6025, "T26 Piloto recibido"),
+        (6033, "T34 Piloto listo"),
+        (6062, "T63 Rotador antihorario"),
+        (6054, "T55 Rotador horario"),
+        (6055, "T56 Rotador stop"),
+        (6056, "T57 Banda adelante"),
+        (6057, "T58 Banda atras"),
+        (6058, "T59 Banda stop"),
+        (6059, "T60 Torreta verde"),
+        (6060, "T61 Torreta amarillo"),
+        (6053, "T54 Torreta rojo"),
+        (6063, "T64 Piloto sen. salida"),
+        (6064, "T65 Piloto sen. entrada"),
+        (6065, "T66 Piloto sen. giro"),
+        (6066, "T67 Piloto btn verde"),
+        (6067, "T68 Piloto btn rojo"),
+        (6068, "T69 Piloto btn paro"),
     ]
     print("  --- SCAN CENTRAL (HORNER_3) ---")
-    for num, desc in known:
-        addr = 6000 + num
+    for addr, desc in known:
         result = client.read_coils(addr, count=1)
         if result and not result.isError():
             val = 1 if result.bits[0] else 0
             marker = " <--" if val else ""
-            print(f"  T{num:3d} = {val}  | {desc}{marker}")
+            print(f"  addr {addr} = {val}  | {desc}{marker}")
         else:
-            print(f"  T{num:3d} = ERR | {desc}")
+            print(f"  addr {addr} = ERR | {desc}")
     print("  --- FIN SCAN ---")
 
 
