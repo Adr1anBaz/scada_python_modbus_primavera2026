@@ -141,9 +141,9 @@ ENTRADA_VFD_LEER = 3507               # R508 - leer frecuencia del VFD
 #                      o:  manager.read_input("HORNER_1", SALIDA_INPUT_XXX)
 # =============================================================================
 
-# --- Registro de control de bits (R170 = dirección 3168) ---
+# --- Registro de control de bits (R170 = dirección 3169) ---
 # Las M originales fueron remapeadas como bits de este registro.
-SALIDA_REG_CONTROL = 3168             # R170 → addr 3168
+SALIDA_REG_CONTROL = 3169             # R170 → addr 3169
 
 # Bits del registro R170:
 SALIDA_BIT_MODO_INT_A_PROC = 0        # M29 (R170.0) - Modo Integración → Modo Proceso
@@ -162,10 +162,10 @@ SALIDA_BIT_BANDA_SALIDA = 12          # R170.12 - control enclavable de banda de
 # SALIDA_BIT_RESET_BANDA = ?          # M45 - reset banda (manda 2 a R506) — no mapeado en notasLeo
 
 # --- Registros directos ---
-SALIDA_VFD_ESCRIBIR = 3496            # R498 → addr 3496
-SALIDA_VFD_LEER = 3506                # R508 → addr 3506
-SALIDA_MAQUINA_ESTADOS = 2999         # R1 → addr 2999
-SALIDA_SWITCH_BANDA = 3098            # R100 → addr 3098 (5376=izq, 5377=off, 5378=der)
+SALIDA_VFD_ESCRIBIR = 3497            # R498 → addr 3497
+SALIDA_VFD_LEER = 3507                # R508 → addr 3507
+SALIDA_MAQUINA_ESTADOS = 3000         # R1 → addr 3000
+SALIDA_SWITCH_BANDA = 3099            # R100 → addr 3099 (5376=izq, 5377=off, 5378=der)
 
 # --- Entradas físicas (usar con manager.read_input) ---
 SALIDA_INPUT_BOTON_NA = 0             # I1 - botón NA
