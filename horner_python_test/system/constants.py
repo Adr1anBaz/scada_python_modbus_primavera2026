@@ -27,7 +27,7 @@ DEFAULT_PORT = 502   # Puerto estándar Modbus TCP
 # --- Navegación HMI (solo cambian pantalla, no afectan actuadores) ---
 # CENTRAL_MODO_PROCESO = 6076       # T76 - ir a pestaña proceso + señal init
 # CENTRAL_MODO_INTEGRACION = 6070   # T70 - ir a modo integración + señal init
-# CENTRAL_MODO_PRUEBA = 6051        # T51 - ir a modo prueba (individual)
+CENTRAL_MODO_PRUEBA = 6051          # T51 - ir a modo prueba (enclavable)
 # CENTRAL_MENU = 6053               # T53 - regresar al menú principal
 
 # --- Control general ---
@@ -44,7 +44,7 @@ CENTRAL_PILOTO_LISTO = 6034        # T34 - piloto: sistema listo para nueva caja
 
 # --- Modo prueba: control de rotador ---
 CENTRAL_ROTADOR_ANTIHORARIO = 6063  # T63 - girar rotador sentido antihorario
-CENTRAL_ROTADOR_HORARIO = 6055     # T55 - girar rotador sentido horario
+CENTRAL_ROTADOR_HORARIO = 6054     # T54 - girar rotador sentido horario
 CENTRAL_ROTADOR_STOP = 6056        # T56 - detener giro del rotador
 
 # --- Modo prueba: control de banda ---
@@ -55,7 +55,7 @@ CENTRAL_BANDA_STOP = 6059          # T59 - detener banda
 # --- Modo prueba: torreta ---
 CENTRAL_TORRETA_VERDE = 6060       # T60 - torreta piloto verde
 CENTRAL_TORRETA_AMARILLO = 6061    # T61 - torreta piloto amarillo
-CENTRAL_TORRETA_ROJO = 6054        # T54 - torreta piloto rojo
+CENTRAL_TORRETA_ROJO = 6055        # T55 - torreta piloto rojo
 
 # --- Modo prueba: pilotos de diagnóstico (lectura) ---
 CENTRAL_PILOTO_SENSOR_SALIDA = 6064   # T64 - sensor de salida
@@ -154,6 +154,7 @@ SALIDA_BIT_PLUMA_ENTRADA_CERRAR = 8   # M42 (R170.8) - cerrar pluma de entrada
 SALIDA_BIT_PLUMA_SALIDA_ABRIR = 9     # M43 (R170.9) - abrir pluma de salida
 SALIDA_BIT_PLUMA_SALIDA_CERRAR = 10   # M44 (R170.10) - cerrar pluma de salida
 SALIDA_BIT_MODO_IND_A_PROC = 11       # M37 (R170.11) - Modo Individual → Modo Proceso
+SALIDA_BIT_BANDA_SALIDA = 12          # R170.12 - control enclavable de banda de salida
 # SALIDA_BIT_RESET_BANDA = ?          # M45 - reset banda (manda 2 a R506) — no mapeado en notasLeo
 
 # --- Registros directos ---

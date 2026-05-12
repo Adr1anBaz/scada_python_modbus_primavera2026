@@ -13,6 +13,7 @@ from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont, QPalette, QColor
 
 from system import PLCManager
+import system.constants as constants
 
 
 # =============================================================================
@@ -126,6 +127,26 @@ def styled_btn(color, text_color="#ffffff"):
         f"border: none; border-radius: 6px; padding: 8px 18px; "
         f"font-size: 12px; font-weight: bold; min-width: 60px; min-height: 30px;"
     )
+
+
+def coil_label(address: int) -> str:
+    if 6000 <= address < 7000:
+        return f"T{address - 6000} ({address})"
+    return f"COIL ({address})"
+
+
+def register_label(address: int) -> str:
+    if address >= 3000:
+        return f"R{address - 2999} ({address})"
+    return f"REG ({address})"
+
+
+def register_bit_label(address: int, bit: int) -> str:
+    if address >= 3000:
+        return f"R{address - 2999}.{bit} ({address}.{bit})"
+    return f"REG.{bit} ({address}.{bit})"
+
+
 from system.constants import *
 
 
@@ -209,19 +230,36 @@ class EntradaTab(QWidget):
         top_row.addWidget(grp_lamparas)
 
         grp_torreta = QGroupBox("Torreta")
-        torreta_layout = QHBoxLayout(grp_torreta)
-        self.btn_torr_verde = QPushButton("Verde")
+        torreta_layout = QGridLayout(grp_torreta)
+        torreta_layout.addWidget(QLabel("Verde:"), 0, 0)
+        self.btn_torr_verde = QPushButton("ON")
         self.btn_torr_verde.setStyleSheet(self._btn_style("#2f9e44"))
         self.btn_torr_verde.clicked.connect(self.on_torreta_verde)
-        torreta_layout.addWidget(self.btn_torr_verde)
-        self.btn_torr_amarilla = QPushButton("Amarillo")
+        torreta_layout.addWidget(self.btn_torr_verde, 0, 1)
+        self.btn_torr_verde_off = QPushButton("OFF")
+        self.btn_torr_verde_off.setStyleSheet(self._btn_style("#868e96"))
+        self.btn_torr_verde_off.clicked.connect(self.on_torreta_verde_off)
+        torreta_layout.addWidget(self.btn_torr_verde_off, 0, 2)
+
+        torreta_layout.addWidget(QLabel("Amarillo:"), 1, 0)
+        self.btn_torr_amarilla = QPushButton("ON")
         self.btn_torr_amarilla.setStyleSheet(self._btn_style("#f08c00"))
         self.btn_torr_amarilla.clicked.connect(self.on_torreta_amarilla)
-        torreta_layout.addWidget(self.btn_torr_amarilla)
-        self.btn_torr_roja = QPushButton("Rojo")
+        torreta_layout.addWidget(self.btn_torr_amarilla, 1, 1)
+        self.btn_torr_amarilla_off = QPushButton("OFF")
+        self.btn_torr_amarilla_off.setStyleSheet(self._btn_style("#868e96"))
+        self.btn_torr_amarilla_off.clicked.connect(self.on_torreta_amarilla_off)
+        torreta_layout.addWidget(self.btn_torr_amarilla_off, 1, 2)
+
+        torreta_layout.addWidget(QLabel("Roja:"), 2, 0)
+        self.btn_torr_roja = QPushButton("ON")
         self.btn_torr_roja.setStyleSheet(self._btn_style("#e03131"))
         self.btn_torr_roja.clicked.connect(self.on_torreta_roja)
-        torreta_layout.addWidget(self.btn_torr_roja)
+        torreta_layout.addWidget(self.btn_torr_roja, 2, 1)
+        self.btn_torr_roja_off = QPushButton("OFF")
+        self.btn_torr_roja_off.setStyleSheet(self._btn_style("#868e96"))
+        self.btn_torr_roja_off.clicked.connect(self.on_torreta_roja_off)
+        torreta_layout.addWidget(self.btn_torr_roja_off, 2, 2)
         top_row.addWidget(grp_torreta)
 
         layout.addLayout(top_row)
@@ -329,37 +367,46 @@ class EntradaTab(QWidget):
     # --- Acciones de botones ---
 
     def on_inicio(self):
-        self._write_coil(ENTRADA_INICIO, True, "INICIO activado")
+        self._pulse_coil(ENTRADA_INICIO, "INICIO activado")
 
     def on_stop(self):
-        self._write_coil(ENTRADA_STOP, True, "STOP activado")
+        self._pulse_coil(ENTRADA_STOP, "STOP activado")
 
     def on_banda_izq(self):
-        self._write_coil(ENTRADA_BANDA_IZQUIERDA, True, "Banda izquierda")
+        self._pulse_coil(ENTRADA_BANDA_IZQUIERDA, "Banda izquierda")
 
     def on_banda_der(self):
-        self._write_coil(ENTRADA_BANDA_DERECHA, True, "Banda derecha")
+        self._pulse_coil(ENTRADA_BANDA_DERECHA, "Banda derecha")
 
     def on_banda_stop(self):
-        self._write_coil(ENTRADA_BANDA_STOP, True, "Banda detenida")
+        self._pulse_coil(ENTRADA_BANDA_STOP, "Banda detenida")
 
     def on_pluma_ini_sube(self):
-        self._write_coil(ENTRADA_PLUMA_INICIO_SUBE, True, "Pluma inicio sube")
+        self._pulse_coil(ENTRADA_PLUMA_INICIO_SUBE, "Pluma inicio sube")
 
     def on_pluma_ini_baja(self):
-        self._write_coil(ENTRADA_PLUMA_INICIO_BAJA, True, "Pluma inicio baja")
+        self._pulse_coil(ENTRADA_PLUMA_INICIO_BAJA, "Pluma inicio baja")
 
     def on_pluma_fin(self):
-        self._write_coil(ENTRADA_PLUMA_FIN, True, "Pluma fin toggle")
+        self._pulse_coil(ENTRADA_PLUMA_FIN, "Pluma fin toggle")
 
     def on_torreta_verde(self):
         self._write_coil(ENTRADA_TORRETA_VERDE, True, "Torreta verde ON")
 
+    def on_torreta_verde_off(self):
+        self._write_coil(ENTRADA_TORRETA_VERDE, False, "Torreta verde OFF")
+
     def on_torreta_amarilla(self):
         self._write_coil(ENTRADA_TORRETA_AMARILLA, True, "Torreta amarilla ON")
 
+    def on_torreta_amarilla_off(self):
+        self._write_coil(ENTRADA_TORRETA_AMARILLA, False, "Torreta amarilla OFF")
+
     def on_torreta_roja(self):
         self._write_coil(ENTRADA_TORRETA_ROJA, True, "Torreta roja ON")
+
+    def on_torreta_roja_off(self):
+        self._write_coil(ENTRADA_TORRETA_ROJA, False, "Torreta roja OFF")
 
     def on_vfd_escribir(self):
         text = self.input_vfd.text().strip()
@@ -368,7 +415,10 @@ class EntradaTab(QWidget):
         try:
             value = int(text)
             self.manager.write_register(self.PLC_ID, ENTRADA_VFD_ESCRIBIR, value)
-            self.log(f"[ENTRADA] VFD frecuencia escrita: {value}")
+            self.log(
+                f"[ENTRADA] VFD frecuencia escrita: {value} | "
+                f"{register_label(ENTRADA_VFD_ESCRIBIR)}={value}"
+            )
         except ValueError:
             self.log("[ENTRADA] Error: frecuencia debe ser un número entero")
         except Exception as e:
@@ -423,7 +473,15 @@ class EntradaTab(QWidget):
     def _write_coil(self, address, value, msg):
         try:
             self.manager.write_coil(self.PLC_ID, address, value)
-            self.log(f"[ENTRADA] {msg}")
+            state = "ON" if value else "OFF"
+            self.log(f"[ENTRADA] {msg} | {coil_label(address)}={state}")
+        except Exception as e:
+            self.log(f"[ENTRADA] Error: {e}")
+
+    def _pulse_coil(self, address, msg):
+        try:
+            self._write_coil(address, True, f"{msg} (pulso)")
+            QTimer.singleShot(100, lambda: self._write_coil(address, False, f"{msg} OFF"))
         except Exception as e:
             self.log(f"[ENTRADA] Error: {e}")
 
@@ -471,6 +529,12 @@ class CentralTab(QWidget):
         self.btn_ur3_fin.setStyleSheet(self._btn_style("#7048e8"))
         self.btn_ur3_fin.clicked.connect(self.on_ur3_fin)
         ctrl_layout.addWidget(self.btn_ur3_fin)
+
+        self.btn_t51 = QPushButton("T51")
+        self.btn_t51.setCheckable(True)
+        self.btn_t51.setStyleSheet(self._btn_style("#7048e8"))
+        self.btn_t51.toggled.connect(self.on_modo_prueba)
+        ctrl_layout.addWidget(self.btn_t51)
 
         top_row.addWidget(grp_control)
 
@@ -536,22 +600,37 @@ class CentralTab(QWidget):
         bot_row = QHBoxLayout()
 
         grp_torreta = QGroupBox("Torreta")
-        torreta_layout = QHBoxLayout(grp_torreta)
+        torreta_layout = QGridLayout(grp_torreta)
 
-        self.btn_torr_verde = QPushButton("Verde")
+        torreta_layout.addWidget(QLabel("Verde:"), 0, 0)
+        self.btn_torr_verde = QPushButton("ON")
         self.btn_torr_verde.setStyleSheet(self._btn_style("#2f9e44"))
         self.btn_torr_verde.clicked.connect(self.on_torreta_verde)
-        torreta_layout.addWidget(self.btn_torr_verde)
+        torreta_layout.addWidget(self.btn_torr_verde, 0, 1)
+        self.btn_torr_verde_off = QPushButton("OFF")
+        self.btn_torr_verde_off.setStyleSheet(self._btn_style("#868e96"))
+        self.btn_torr_verde_off.clicked.connect(self.on_torreta_verde_off)
+        torreta_layout.addWidget(self.btn_torr_verde_off, 0, 2)
 
-        self.btn_torr_amarillo = QPushButton("Amarillo")
+        torreta_layout.addWidget(QLabel("Amarillo:"), 1, 0)
+        self.btn_torr_amarillo = QPushButton("ON")
         self.btn_torr_amarillo.setStyleSheet(self._btn_style("#f08c00"))
         self.btn_torr_amarillo.clicked.connect(self.on_torreta_amarillo)
-        torreta_layout.addWidget(self.btn_torr_amarillo)
+        torreta_layout.addWidget(self.btn_torr_amarillo, 1, 1)
+        self.btn_torr_amarillo_off = QPushButton("OFF")
+        self.btn_torr_amarillo_off.setStyleSheet(self._btn_style("#868e96"))
+        self.btn_torr_amarillo_off.clicked.connect(self.on_torreta_amarillo_off)
+        torreta_layout.addWidget(self.btn_torr_amarillo_off, 1, 2)
 
-        self.btn_torr_rojo = QPushButton("Rojo")
+        torreta_layout.addWidget(QLabel("Rojo:"), 2, 0)
+        self.btn_torr_rojo = QPushButton("ON")
         self.btn_torr_rojo.setStyleSheet(self._btn_style("#e03131"))
         self.btn_torr_rojo.clicked.connect(self.on_torreta_rojo)
-        torreta_layout.addWidget(self.btn_torr_rojo)
+        torreta_layout.addWidget(self.btn_torr_rojo, 2, 1)
+        self.btn_torr_rojo_off = QPushButton("OFF")
+        self.btn_torr_rojo_off.setStyleSheet(self._btn_style("#868e96"))
+        self.btn_torr_rojo_off.clicked.connect(self.on_torreta_rojo_off)
+        torreta_layout.addWidget(self.btn_torr_rojo_off, 2, 2)
 
         bot_row.addWidget(grp_torreta)
 
@@ -588,43 +667,55 @@ class CentralTab(QWidget):
     # --- Acciones de botones ---
 
     def on_stop(self):
-        self._write_coil(CENTRAL_STOP, True, "STOP activado")
+        self._pulse_coil(CENTRAL_STOP, "STOP activado")
 
     def on_llego_caja(self):
-        self._write_coil(CENTRAL_LLEGO_CAJA, True, "Señal: llegó caja")
+        self._pulse_coil(CENTRAL_LLEGO_CAJA, "Señal: llegó caja")
 
     def on_recibio_b3(self):
-        self._write_coil(CENTRAL_RECIBIO_BANDA3, True, "Señal: recibió banda 3")
+        self._pulse_coil(CENTRAL_RECIBIO_BANDA3, "Señal: recibió banda 3")
 
     def on_ur3_fin(self):
-        self._write_coil(CENTRAL_UR3_FIN, True, "Señal: UR3 fin")
+        self._pulse_coil(CENTRAL_UR3_FIN, "Señal: UR3 fin")
+
+    def on_modo_prueba(self, checked):
+        self._write_coil(CENTRAL_MODO_PRUEBA, checked, f"T51 {'ON' if checked else 'OFF'}")
 
     def on_rotador_anti(self):
-        self._write_coil(CENTRAL_ROTADOR_ANTIHORARIO, True, "Rotador antihorario")
+        self._pulse_coil(CENTRAL_ROTADOR_ANTIHORARIO, "Rotador antihorario")
 
     def on_rotador_stop(self):
-        self._write_coil(CENTRAL_ROTADOR_STOP, True, "Rotador detenido")
+        self._pulse_coil(CENTRAL_ROTADOR_STOP, "Rotador detenido")
 
     def on_rotador_hora(self):
-        self._write_coil(CENTRAL_ROTADOR_HORARIO, True, "Rotador horario")
+        self._pulse_coil(CENTRAL_ROTADOR_HORARIO, "Rotador horario")
 
     def on_banda_atras(self):
-        self._write_coil(CENTRAL_BANDA_ATRAS, True, "Banda atras")
+        self._pulse_coil(CENTRAL_BANDA_ATRAS, "Banda atras")
 
     def on_banda_stop(self):
-        self._write_coil(CENTRAL_BANDA_STOP, True, "Banda detenida")
+        self._pulse_coil(CENTRAL_BANDA_STOP, "Banda detenida")
 
     def on_banda_adelante(self):
-        self._write_coil(CENTRAL_BANDA_ADELANTE, True, "Banda adelante")
+        self._pulse_coil(CENTRAL_BANDA_ADELANTE, "Banda adelante")
 
     def on_torreta_verde(self):
         self._write_coil(CENTRAL_TORRETA_VERDE, True, "Torreta verde ON")
 
+    def on_torreta_verde_off(self):
+        self._write_coil(CENTRAL_TORRETA_VERDE, False, "Torreta verde OFF")
+
     def on_torreta_amarillo(self):
         self._write_coil(CENTRAL_TORRETA_AMARILLO, True, "Torreta amarillo ON")
 
+    def on_torreta_amarillo_off(self):
+        self._write_coil(CENTRAL_TORRETA_AMARILLO, False, "Torreta amarillo OFF")
+
     def on_torreta_rojo(self):
         self._write_coil(CENTRAL_TORRETA_ROJO, True, "Torreta rojo ON")
+
+    def on_torreta_rojo_off(self):
+        self._write_coil(CENTRAL_TORRETA_ROJO, False, "Torreta rojo OFF")
 
     # --- Polling de estado ---
 
@@ -660,7 +751,15 @@ class CentralTab(QWidget):
     def _write_coil(self, address, value, msg):
         try:
             self.manager.write_coil(self.PLC_ID, address, value)
-            self.log(f"[CENTRAL] {msg}")
+            state = "ON" if value else "OFF"
+            self.log(f"[CENTRAL] {msg} | {coil_label(address)}={state}")
+        except Exception as e:
+            self.log(f"[CENTRAL] Error: {e}")
+
+    def _pulse_coil(self, address, msg):
+        try:
+            self._write_coil(address, True, f"{msg} (pulso)")
+            QTimer.singleShot(100, lambda: self._write_coil(address, False, f"{msg} OFF"))
         except Exception as e:
             self.log(f"[CENTRAL] Error: {e}")
 
@@ -702,22 +801,37 @@ class SalidaTab(QWidget):
         top_row.addWidget(grp_control)
 
         grp_leds = QGroupBox("LEDs")
-        leds_layout = QHBoxLayout(grp_leds)
+        leds_layout = QGridLayout(grp_leds)
 
-        self.btn_led_verde = QPushButton("Verde")
+        leds_layout.addWidget(QLabel("Verde:"), 0, 0)
+        self.btn_led_verde = QPushButton("ON")
         self.btn_led_verde.setStyleSheet(self._btn_style("#2f9e44"))
         self.btn_led_verde.clicked.connect(self.on_led_verde)
-        leds_layout.addWidget(self.btn_led_verde)
+        leds_layout.addWidget(self.btn_led_verde, 0, 1)
+        self.btn_led_verde_off = QPushButton("OFF")
+        self.btn_led_verde_off.setStyleSheet(self._btn_style("#868e96"))
+        self.btn_led_verde_off.clicked.connect(self.on_led_verde_off)
+        leds_layout.addWidget(self.btn_led_verde_off, 0, 2)
 
-        self.btn_led_amarillo = QPushButton("Amarillo")
+        leds_layout.addWidget(QLabel("Amarillo:"), 1, 0)
+        self.btn_led_amarillo = QPushButton("ON")
         self.btn_led_amarillo.setStyleSheet(self._btn_style("#f08c00"))
         self.btn_led_amarillo.clicked.connect(self.on_led_amarillo)
-        leds_layout.addWidget(self.btn_led_amarillo)
+        leds_layout.addWidget(self.btn_led_amarillo, 1, 1)
+        self.btn_led_amarillo_off = QPushButton("OFF")
+        self.btn_led_amarillo_off.setStyleSheet(self._btn_style("#868e96"))
+        self.btn_led_amarillo_off.clicked.connect(self.on_led_amarillo_off)
+        leds_layout.addWidget(self.btn_led_amarillo_off, 1, 2)
 
-        self.btn_led_rojo = QPushButton("Rojo")
+        leds_layout.addWidget(QLabel("Rojo:"), 2, 0)
+        self.btn_led_rojo = QPushButton("ON")
         self.btn_led_rojo.setStyleSheet(self._btn_style("#e03131"))
         self.btn_led_rojo.clicked.connect(self.on_led_rojo)
-        leds_layout.addWidget(self.btn_led_rojo)
+        leds_layout.addWidget(self.btn_led_rojo, 2, 1)
+        self.btn_led_rojo_off = QPushButton("OFF")
+        self.btn_led_rojo_off.setStyleSheet(self._btn_style("#868e96"))
+        self.btn_led_rojo_off.clicked.connect(self.on_led_rojo_off)
+        leds_layout.addWidget(self.btn_led_rojo_off, 2, 2)
 
         top_row.addWidget(grp_leds)
         layout.addLayout(top_row)
@@ -743,6 +857,12 @@ class SalidaTab(QWidget):
         self.btn_banda_der.setStyleSheet(self._btn_style("#1c7ed6"))
         self.btn_banda_der.clicked.connect(self.on_banda_der)
         banda_btns.addWidget(self.btn_banda_der)
+
+        self.btn_banda_t12 = QPushButton("T12")
+        self.btn_banda_t12.setCheckable(True)
+        self.btn_banda_t12.setStyleSheet(self._btn_style("#7048e8"))
+        self.btn_banda_t12.toggled.connect(self.on_banda_salida)
+        banda_btns.addWidget(self.btn_banda_t12)
 
         banda_layout.addLayout(banda_btns)
 
@@ -837,11 +957,20 @@ class SalidaTab(QWidget):
     def on_led_verde(self):
         self._write_bit(SALIDA_BIT_LED_VERDE, True, "LED verde ON")
 
+    def on_led_verde_off(self):
+        self._write_bit(SALIDA_BIT_LED_VERDE, False, "LED verde OFF")
+
     def on_led_amarillo(self):
         self._write_bit(SALIDA_BIT_LED_AMARILLO, True, "LED amarillo ON")
 
+    def on_led_amarillo_off(self):
+        self._write_bit(SALIDA_BIT_LED_AMARILLO, False, "LED amarillo OFF")
+
     def on_led_rojo(self):
         self._write_bit(SALIDA_BIT_LED_ROJO, True, "LED rojo ON")
+
+    def on_led_rojo_off(self):
+        self._write_bit(SALIDA_BIT_LED_ROJO, False, "LED rojo OFF")
 
     def on_banda_izq(self):
         self._write_register(SALIDA_SWITCH_BANDA, 5376, "Banda izquierda")
@@ -851,6 +980,9 @@ class SalidaTab(QWidget):
 
     def on_banda_der(self):
         self._write_register(SALIDA_SWITCH_BANDA, 5378, "Banda derecha")
+
+    def on_banda_salida(self, checked):
+        self._write_bit(SALIDA_BIT_BANDA_SALIDA, checked, f"Banda salida {'ON' if checked else 'OFF'}")
 
     def on_pluma_entrada_abrir(self):
         self._write_bit(SALIDA_BIT_LED_VERDE, True, "Pluma entrada abierta")
@@ -871,7 +1003,10 @@ class SalidaTab(QWidget):
         try:
             value = int(text)
             self.manager.write_register(self.PLC_ID, SALIDA_VFD_ESCRIBIR, value)
-            self.log(f"[SALIDA] VFD frecuencia escrita: {value}")
+            self.log(
+                f"[SALIDA] VFD frecuencia escrita: {value} | "
+                f"{register_label(SALIDA_VFD_ESCRIBIR)}={value}"
+            )
         except ValueError:
             self.log("[SALIDA] Error: frecuencia debe ser un número entero")
         except Exception as e:
@@ -911,14 +1046,18 @@ class SalidaTab(QWidget):
         try:
             self.manager.write_register_bit(
                 self.PLC_ID, SALIDA_REG_CONTROL, bit, state)
-            self.log(f"[SALIDA] {msg}")
+            state_text = "ON" if state else "OFF"
+            self.log(
+                f"[SALIDA] {msg} | "
+                f"{register_bit_label(SALIDA_REG_CONTROL, bit)}={state_text}"
+            )
         except Exception as e:
             self.log(f"[SALIDA] Error: {e}")
 
     def _write_register(self, address, value, msg):
         try:
             self.manager.write_register(self.PLC_ID, address, value)
-            self.log(f"[SALIDA] {msg}")
+            self.log(f"[SALIDA] {msg} | {register_label(address)}={value}")
         except Exception as e:
             self.log(f"[SALIDA] Error: {e}")
 
@@ -959,6 +1098,12 @@ class MainWindow(QMainWindow):
         self.btn_connect.setStyleSheet(styled_btn("#4263eb"))
         self.btn_connect.clicked.connect(self.toggle_connection)
         header.addWidget(self.btn_connect)
+
+        self.btn_reset = QPushButton("RESET")
+        self.btn_reset.setStyleSheet(styled_btn("#f08c00"))
+        self.btn_reset.clicked.connect(self.on_reset)
+        header.addWidget(self.btn_reset)
+
         main_layout.addLayout(header)
 
         # Tabs
@@ -1032,6 +1177,73 @@ class MainWindow(QMainWindow):
         self.tab_entrada.refresh()
         self.tab_central.refresh()
         self.tab_salida.refresh()
+
+    def on_reset(self):
+        if QMessageBox.question(
+            self,
+            "Confirmar reset",
+            "Esto pondrá en cero todas las T activas y los bits de control del registro R170.\n\n¿Deseas continuar?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        ) != QMessageBox.Yes:
+            return
+
+        try:
+            coil_operations = self._build_reset_coil_operations()
+            coil_results = self.manager.write_coil_multiple(coil_operations)
+
+            bit_results = []
+            for bit_name, bit in sorted(
+                (
+                    (name, value)
+                    for name, value in vars(constants).items()
+                    if name.startswith("SALIDA_BIT_") and isinstance(value, int)
+                ),
+                key=lambda item: item[1],
+            ):
+                try:
+                    self.manager.write_register_bit(
+                        "HORNER_1", SALIDA_REG_CONTROL, bit, False
+                    )
+                    bit_results.append((bit_name, True))
+                except Exception as e:
+                    bit_results.append((bit_name, False))
+                    self.log_message(f"[RESET] Error limpiando {bit_name}: {e}")
+
+            ok_coils = sum(1 for value in coil_results.values() if value)
+            total_coils = len(coil_results)
+            ok_bits = sum(1 for _, ok in bit_results if ok)
+            total_bits = len(bit_results)
+
+            self.log_message(
+                f"[RESET] T limpiadas: {ok_coils}/{total_coils}. Bits limpiados: {ok_bits}/{total_bits}."
+            )
+        except Exception as e:
+            self.log_message(f"[RESET] Error ejecutando reset: {e}")
+
+    def _build_reset_coil_operations(self):
+        operations = []
+        seen_addresses = set()
+
+        for name, value in vars(constants).items():
+            if not isinstance(value, int):
+                continue
+
+            if name.startswith("CENTRAL_") and 6000 <= value < 7000:
+                key = ("HORNER_3", value)
+            elif name.startswith("ENTRADA_") and 6000 <= value < 7000:
+                key = ("HORNER_2", value)
+            else:
+                continue
+
+            if key in seen_addresses:
+                continue
+
+            seen_addresses.add(key)
+            operations.append((key[0], key[1], False))
+
+        operations.sort(key=lambda item: (item[0], item[1]))
+        return operations
 
     def log_message(self, msg):
         self.txt_log.append(msg)
