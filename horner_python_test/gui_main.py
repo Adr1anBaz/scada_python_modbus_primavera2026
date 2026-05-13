@@ -438,20 +438,28 @@ class EntradaTab(QWidget):
 
     # --- Acciones de botones ---
 
+    def _release_all_modes(self):
+        self._write_coil(ENTRADA_MODO_INTEGRACION, False, "T51 OFF")
+        self._write_coil(ENTRADA_MODO_INDIVIDUAL, False, "T52 OFF")
+        self._write_coil(ENTRADA_MODO_PRUEBA, False, "T53 OFF")
+
     def on_modo_integracion(self):
-        self._pulse_coil(ENTRADA_MODO_INTEGRACION, "Modo Integración (T51)")
+        self._release_all_modes()
+        self._write_coil(ENTRADA_MODO_INTEGRACION, True, "Modo Integración ON (T51 hold)")
         self._set_prueba_enabled(False)
 
     def on_modo_individual(self):
-        self._pulse_coil(ENTRADA_MODO_INDIVIDUAL, "Modo Individual (T52)")
+        self._release_all_modes()
+        self._write_coil(ENTRADA_MODO_INDIVIDUAL, True, "Modo Individual ON (T52 hold)")
         self._set_prueba_enabled(False)
 
     def on_modo_prueba(self):
+        self._release_all_modes()
         self._write_coil(ENTRADA_MODO_PRUEBA, True, "Modo Prueba ON (T53 hold)")
         self._set_prueba_enabled(True)
 
     def on_salir_prueba(self):
-        self._write_coil(ENTRADA_MODO_PRUEBA, False, "Modo Prueba OFF (T53 release)")
+        self._release_all_modes()
         self._set_prueba_enabled(False)
 
     def on_inicio(self):
