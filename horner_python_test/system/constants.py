@@ -90,7 +90,7 @@ ENTRADA_INICIO = 6098                  # T99 → addr 6098
 
 # --- Control general (modo individual) ---
 ENTRADA_STOP_INDIVIDUAL = 6032         # T33 → addr 6032
-ENTRADA_INICIO_INDIVIDUAL = 6998       # T999 → addr 6998
+ENTRADA_INICIO_INDIVIDUAL = 6098       # T99 → addr 6098 (mismo que integración)
 
 # --- Pilotos de lámparas (lectura) ---
 ENTRADA_LAMPARA_VERDE = 6008           # T9 → addr 6008
@@ -100,12 +100,13 @@ ENTRADA_LAMPARA_ROJA = 6076            # T77 → addr 6076
 # --- Modo prueba: control de plumas ---
 ENTRADA_PLUMA_INICIO_SUBE = 6004       # T5 → addr 6004
 ENTRADA_PLUMA_INICIO_BAJA = 6005       # T6 → addr 6005
-ENTRADA_PLUMA_FIN = 6006               # T7 → addr 6006
+ENTRADA_PLUMA_FIN_SUBE = 6006          # T7 → addr 6006
+ENTRADA_PLUMA_FIN_BAJA = 6007          # T8 → addr 6007
 
 # --- Modo prueba: control de banda ---
-ENTRADA_BANDA_DERECHA = 6044           # T45 → addr 6044
 ENTRADA_BANDA_IZQUIERDA = 6043         # T44 → addr 6043
-ENTRADA_BANDA_STOP = 6045              # T46 → addr 6045
+ENTRADA_BANDA_STOP = 6044              # T45 → addr 6044 (paro)
+ENTRADA_BANDA_DERECHA = 6045           # T46 → addr 6045
 
 # --- Modo prueba: torreta manual ---
 ENTRADA_TORRETA_VERDE = 6344           # T345 → addr 6344

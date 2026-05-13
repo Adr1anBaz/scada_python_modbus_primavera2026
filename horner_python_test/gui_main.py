@@ -327,10 +327,14 @@ class EntradaTab(QWidget):
         self.btn_pluma_ini_baja.clicked.connect(self.on_pluma_ini_baja)
         plumas_layout.addWidget(self.btn_pluma_ini_baja, 0, 2)
         plumas_layout.addWidget(QLabel("Fin:"), 1, 0)
-        self.btn_pluma_fin = QPushButton("Toggle")
-        self.btn_pluma_fin.setStyleSheet(self._btn_style("#1c7ed6"))
-        self.btn_pluma_fin.clicked.connect(self.on_pluma_fin)
-        plumas_layout.addWidget(self.btn_pluma_fin, 1, 1)
+        self.btn_pluma_fin_sube = QPushButton("Sube")
+        self.btn_pluma_fin_sube.setStyleSheet(self._btn_style("#1c7ed6"))
+        self.btn_pluma_fin_sube.clicked.connect(self.on_pluma_fin_sube)
+        plumas_layout.addWidget(self.btn_pluma_fin_sube, 1, 1)
+        self.btn_pluma_fin_baja = QPushButton("Baja")
+        self.btn_pluma_fin_baja.setStyleSheet(self._btn_style("#1c7ed6"))
+        self.btn_pluma_fin_baja.clicked.connect(self.on_pluma_fin_baja)
+        plumas_layout.addWidget(self.btn_pluma_fin_baja, 1, 2)
         mid_row.addWidget(grp_plumas)
 
         grp_torreta = QGroupBox("Torreta (Modo Prueba)")
@@ -424,7 +428,8 @@ class EntradaTab(QWidget):
             self.btn_vfd_escribir: self._btn_style("#4263eb"),
             self.btn_pluma_ini_sube: self._btn_style("#1c7ed6"),
             self.btn_pluma_ini_baja: self._btn_style("#1c7ed6"),
-            self.btn_pluma_fin: self._btn_style("#1c7ed6"),
+            self.btn_pluma_fin_sube: self._btn_style("#1c7ed6"),
+            self.btn_pluma_fin_baja: self._btn_style("#1c7ed6"),
             self.btn_torr_verde: styled_btn_sm("#2f9e44"),
             self.btn_torr_verde_off: styled_btn_sm("#868e96"),
             self.btn_torr_amarilla: styled_btn_sm("#f08c00"),
@@ -469,10 +474,10 @@ class EntradaTab(QWidget):
         self._pulse_coil(ENTRADA_STOP, "STOP activado")
 
     def on_banda_izq(self):
-        self._pulse_coil(ENTRADA_BANDA_DERECHA, "Banda izquierda")
+        self._pulse_coil(ENTRADA_BANDA_IZQUIERDA, "Banda izquierda")
 
     def on_banda_der(self):
-        self._pulse_coil(ENTRADA_BANDA_IZQUIERDA, "Banda derecha")
+        self._pulse_coil(ENTRADA_BANDA_DERECHA, "Banda derecha")
 
     def on_banda_stop(self):
         self._pulse_coil(ENTRADA_BANDA_STOP, "Banda detenida")
@@ -483,8 +488,11 @@ class EntradaTab(QWidget):
     def on_pluma_ini_baja(self):
         self._pulse_coil(ENTRADA_PLUMA_INICIO_BAJA, "Pluma inicio baja")
 
-    def on_pluma_fin(self):
-        self._pulse_coil(ENTRADA_PLUMA_FIN, "Pluma fin toggle")
+    def on_pluma_fin_sube(self):
+        self._pulse_coil(ENTRADA_PLUMA_FIN_SUBE, "Pluma fin sube")
+
+    def on_pluma_fin_baja(self):
+        self._pulse_coil(ENTRADA_PLUMA_FIN_BAJA, "Pluma fin baja")
 
     def on_torreta_verde(self):
         self._write_coil(ENTRADA_TORRETA_VERDE, True, "Torreta verde ON")
