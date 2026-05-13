@@ -204,6 +204,7 @@ class EntradaTab(QWidget):
         self.manager = manager
         self.log = log_callback
         self.connected = False
+        self.prueba_active = False
         self.setup_ui()
 
     def setup_ui(self):
@@ -222,8 +223,33 @@ class EntradaTab(QWidget):
         conn_row.addStretch()
         layout.addLayout(conn_row)
 
-        # --- Fila 1: Control + Lamparas + Torreta ---
+        # --- Fila 1: Navegación + Control + Lamparas ---
         top_row = QHBoxLayout()
+
+        grp_nav = QGroupBox("Navegación")
+        nav_layout = QHBoxLayout(grp_nav)
+
+        self.btn_modo_integracion = QPushButton("Integración")
+        self.btn_modo_integracion.setStyleSheet(self._btn_style("#1c7ed6"))
+        self.btn_modo_integracion.clicked.connect(self.on_modo_integracion)
+        nav_layout.addWidget(self.btn_modo_integracion)
+
+        self.btn_modo_individual = QPushButton("Individual")
+        self.btn_modo_individual.setStyleSheet(self._btn_style("#2f9e44"))
+        self.btn_modo_individual.clicked.connect(self.on_modo_individual)
+        nav_layout.addWidget(self.btn_modo_individual)
+
+        self.btn_modo_prueba = QPushButton("Prueba")
+        self.btn_modo_prueba.setStyleSheet(self._btn_style("#7048e8"))
+        self.btn_modo_prueba.clicked.connect(self.on_modo_prueba)
+        nav_layout.addWidget(self.btn_modo_prueba)
+
+        self.btn_salir_prueba = QPushButton("Salir Prueba")
+        self.btn_salir_prueba.setStyleSheet(self._btn_style("#868e96"))
+        self.btn_salir_prueba.clicked.connect(self.on_salir_prueba)
+        nav_layout.addWidget(self.btn_salir_prueba)
+
+        top_row.addWidget(grp_nav)
 
         grp_control = QGroupBox("Control")
         ctrl_layout = QHBoxLayout(grp_control)
@@ -250,45 +276,12 @@ class EntradaTab(QWidget):
         lamp_layout.addWidget(self.led_roja)
         top_row.addWidget(grp_lamparas)
 
-        grp_torreta = QGroupBox("Torreta")
-        torreta_layout = QGridLayout(grp_torreta)
-        torreta_layout.addWidget(QLabel("Verde:"), 0, 0)
-        self.btn_torr_verde = QPushButton("ON")
-        self.btn_torr_verde.setStyleSheet(styled_btn_sm("#2f9e44"))
-        self.btn_torr_verde.clicked.connect(self.on_torreta_verde)
-        torreta_layout.addWidget(self.btn_torr_verde, 0, 1)
-        self.btn_torr_verde_off = QPushButton("OFF")
-        self.btn_torr_verde_off.setStyleSheet(styled_btn_sm("#868e96"))
-        self.btn_torr_verde_off.clicked.connect(self.on_torreta_verde_off)
-        torreta_layout.addWidget(self.btn_torr_verde_off, 0, 2)
-
-        torreta_layout.addWidget(QLabel("Amarillo:"), 1, 0)
-        self.btn_torr_amarilla = QPushButton("ON")
-        self.btn_torr_amarilla.setStyleSheet(styled_btn_sm("#f08c00"))
-        self.btn_torr_amarilla.clicked.connect(self.on_torreta_amarilla)
-        torreta_layout.addWidget(self.btn_torr_amarilla, 1, 1)
-        self.btn_torr_amarilla_off = QPushButton("OFF")
-        self.btn_torr_amarilla_off.setStyleSheet(styled_btn_sm("#868e96"))
-        self.btn_torr_amarilla_off.clicked.connect(self.on_torreta_amarilla_off)
-        torreta_layout.addWidget(self.btn_torr_amarilla_off, 1, 2)
-
-        torreta_layout.addWidget(QLabel("Roja:"), 2, 0)
-        self.btn_torr_roja = QPushButton("ON")
-        self.btn_torr_roja.setStyleSheet(styled_btn_sm("#e03131"))
-        self.btn_torr_roja.clicked.connect(self.on_torreta_roja)
-        torreta_layout.addWidget(self.btn_torr_roja, 2, 1)
-        self.btn_torr_roja_off = QPushButton("OFF")
-        self.btn_torr_roja_off.setStyleSheet(styled_btn_sm("#868e96"))
-        self.btn_torr_roja_off.clicked.connect(self.on_torreta_roja_off)
-        torreta_layout.addWidget(self.btn_torr_roja_off, 2, 2)
-        top_row.addWidget(grp_torreta)
-
         layout.addLayout(top_row)
 
-        # --- Fila 2: Banda + Plumas ---
+        # --- Fila 2: Banda + Plumas + Torreta (Modo Prueba) ---
         mid_row = QHBoxLayout()
 
-        grp_banda = QGroupBox("Banda")
+        grp_banda = QGroupBox("Banda (Modo Prueba)")
         banda_layout = QVBoxLayout(grp_banda)
         banda_btns = QHBoxLayout()
         self.btn_banda_izq = QPushButton("Izq")
@@ -322,7 +315,7 @@ class EntradaTab(QWidget):
         banda_layout.addLayout(vfd_row)
         mid_row.addWidget(grp_banda)
 
-        grp_plumas = QGroupBox("Plumas")
+        grp_plumas = QGroupBox("Plumas (Modo Prueba)")
         plumas_layout = QGridLayout(grp_plumas)
         plumas_layout.addWidget(QLabel("Inicio:"), 0, 0)
         self.btn_pluma_ini_sube = QPushButton("Sube")
@@ -339,6 +332,39 @@ class EntradaTab(QWidget):
         self.btn_pluma_fin.clicked.connect(self.on_pluma_fin)
         plumas_layout.addWidget(self.btn_pluma_fin, 1, 1)
         mid_row.addWidget(grp_plumas)
+
+        grp_torreta = QGroupBox("Torreta (Modo Prueba)")
+        torreta_layout = QGridLayout(grp_torreta)
+        torreta_layout.addWidget(QLabel("Verde:"), 0, 0)
+        self.btn_torr_verde = QPushButton("ON")
+        self.btn_torr_verde.setStyleSheet(styled_btn_sm("#2f9e44"))
+        self.btn_torr_verde.clicked.connect(self.on_torreta_verde)
+        torreta_layout.addWidget(self.btn_torr_verde, 0, 1)
+        self.btn_torr_verde_off = QPushButton("OFF")
+        self.btn_torr_verde_off.setStyleSheet(styled_btn_sm("#868e96"))
+        self.btn_torr_verde_off.clicked.connect(self.on_torreta_verde_off)
+        torreta_layout.addWidget(self.btn_torr_verde_off, 0, 2)
+
+        torreta_layout.addWidget(QLabel("Amarillo:"), 1, 0)
+        self.btn_torr_amarilla = QPushButton("ON")
+        self.btn_torr_amarilla.setStyleSheet(styled_btn_sm("#f08c00"))
+        self.btn_torr_amarilla.clicked.connect(self.on_torreta_amarilla)
+        torreta_layout.addWidget(self.btn_torr_amarilla, 1, 1)
+        self.btn_torr_amarilla_off = QPushButton("OFF")
+        self.btn_torr_amarilla_off.setStyleSheet(styled_btn_sm("#868e96"))
+        self.btn_torr_amarilla_off.clicked.connect(self.on_torreta_amarilla_off)
+        torreta_layout.addWidget(self.btn_torr_amarilla_off, 1, 2)
+
+        torreta_layout.addWidget(QLabel("Roja:"), 2, 0)
+        self.btn_torr_roja = QPushButton("ON")
+        self.btn_torr_roja.setStyleSheet(styled_btn_sm("#e03131"))
+        self.btn_torr_roja.clicked.connect(self.on_torreta_roja)
+        torreta_layout.addWidget(self.btn_torr_roja, 2, 1)
+        self.btn_torr_roja_off = QPushButton("OFF")
+        self.btn_torr_roja_off.setStyleSheet(styled_btn_sm("#868e96"))
+        self.btn_torr_roja_off.clicked.connect(self.on_torreta_roja_off)
+        torreta_layout.addWidget(self.btn_torr_roja_off, 2, 2)
+        mid_row.addWidget(grp_torreta)
 
         layout.addLayout(mid_row)
 
@@ -385,7 +411,48 @@ class EntradaTab(QWidget):
 
         layout.addLayout(bot_row)
 
+        # --- Botones de modo prueba empiezan deshabilitados ---
+        self._set_prueba_enabled(False)
+
+    def _set_prueba_enabled(self, enabled):
+        self.prueba_active = enabled
+        disabled_style = styled_btn_sm("#bdc3c7", "#6c757d")
+        btn_styles = {
+            self.btn_banda_izq: self._btn_style("#1c7ed6"),
+            self.btn_banda_stop: self._btn_style("#868e96"),
+            self.btn_banda_der: self._btn_style("#1c7ed6"),
+            self.btn_vfd_escribir: self._btn_style("#4263eb"),
+            self.btn_pluma_ini_sube: self._btn_style("#1c7ed6"),
+            self.btn_pluma_ini_baja: self._btn_style("#1c7ed6"),
+            self.btn_pluma_fin: self._btn_style("#1c7ed6"),
+            self.btn_torr_verde: styled_btn_sm("#2f9e44"),
+            self.btn_torr_verde_off: styled_btn_sm("#868e96"),
+            self.btn_torr_amarilla: styled_btn_sm("#f08c00"),
+            self.btn_torr_amarilla_off: styled_btn_sm("#868e96"),
+            self.btn_torr_roja: styled_btn_sm("#e03131"),
+            self.btn_torr_roja_off: styled_btn_sm("#868e96"),
+        }
+        for btn, active_style in btn_styles.items():
+            btn.setEnabled(enabled)
+            btn.setStyleSheet(active_style if enabled else disabled_style)
+
     # --- Acciones de botones ---
+
+    def on_modo_integracion(self):
+        self._pulse_coil(ENTRADA_MODO_INTEGRACION, "Modo Integración (T51)")
+        self._set_prueba_enabled(False)
+
+    def on_modo_individual(self):
+        self._pulse_coil(ENTRADA_MODO_INDIVIDUAL, "Modo Individual (T52)")
+        self._set_prueba_enabled(False)
+
+    def on_modo_prueba(self):
+        self._write_coil(ENTRADA_MODO_PRUEBA, True, "Modo Prueba ON (T53 hold)")
+        self._set_prueba_enabled(True)
+
+    def on_salir_prueba(self):
+        self._write_coil(ENTRADA_MODO_PRUEBA, False, "Modo Prueba OFF (T53 release)")
+        self._set_prueba_enabled(False)
 
     def on_inicio(self):
         self._pulse_coil(ENTRADA_INICIO, "INICIO activado")

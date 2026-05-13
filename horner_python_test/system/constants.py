@@ -78,11 +78,11 @@ CENTRAL_PILOTO_BOTON_PARO = 6068      # T69 → addr 6068
 #                      o:  manager.read_input("HORNER_2", ENTRADA_XXX)
 # =============================================================================
 
-# --- Navegación HMI (solo cambian pantalla, no afectan actuadores) ---
+# --- Navegación HMI ---
 # NOTA: Offset -1 aplicado. Fórmula real: T_n = 5999 + n
-# ENTRADA_SCREEN_2 = (navegación interna HMI)
-# ENTRADA_SCREEN_1 = (navegación interna HMI)
-# ENTRADA_SCREEN_3 = (navegación interna HMI)
+ENTRADA_MODO_INTEGRACION = 6050        # T51 → addr 6050 (pantalla integración)
+ENTRADA_MODO_INDIVIDUAL = 6051         # T52 → addr 6051 (pantalla individual)
+ENTRADA_MODO_PRUEBA = 6052             # T53 → addr 6052 (pantalla prueba, HOLD activo)
 
 # --- Control general (modo integración) ---
 ENTRADA_STOP = 6029                    # T30 → addr 6029

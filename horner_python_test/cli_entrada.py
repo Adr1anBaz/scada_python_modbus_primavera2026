@@ -125,6 +125,9 @@ def parse_command(cmd: str):
 
 def scan_coils():
     known = [
+        (6050, "T51 Modo Integracion"),
+        (6051, "T52 Modo Individual"),
+        (6052, "T53 Modo Prueba (hold)"),
         (6029, "T30 STOP (integracion)"),
         (6098, "T99 INICIO (integracion)"),
         (6032, "T33 STOP (individual)"),
