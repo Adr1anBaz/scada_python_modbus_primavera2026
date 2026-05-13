@@ -79,43 +79,44 @@ CENTRAL_PILOTO_BOTON_PARO = 6068      # T69 → addr 6068
 # =============================================================================
 
 # --- Navegación HMI (solo cambian pantalla, no afectan actuadores) ---
+# NOTA: Offset -1 aplicado. Fórmula real: T_n = 5999 + n
 # ENTRADA_SCREEN_2 = (navegación interna HMI)
 # ENTRADA_SCREEN_1 = (navegación interna HMI)
 # ENTRADA_SCREEN_3 = (navegación interna HMI)
 
 # --- Control general (modo integración) ---
-ENTRADA_STOP = 6030                    # T30 - STOP, frena todo el sistema
-ENTRADA_INICIO = 6099                  # T99 - señal que inicia el proceso
+ENTRADA_STOP = 6029                    # T30 → addr 6029
+ENTRADA_INICIO = 6098                  # T99 → addr 6098
 
 # --- Control general (modo individual) ---
-ENTRADA_STOP_INDIVIDUAL = 6033         # T33 - STOP en modo individual
-ENTRADA_INICIO_INDIVIDUAL = 6999       # T999 - señal que inicia proceso en modo individual
+ENTRADA_STOP_INDIVIDUAL = 6032         # T33 → addr 6032
+ENTRADA_INICIO_INDIVIDUAL = 6998       # T999 → addr 6998
 
 # --- Pilotos de lámparas (lectura) ---
-ENTRADA_LAMPARA_VERDE = 6009           # T9 - lámpara verde
-ENTRADA_LAMPARA_AMARILLA = 6088        # T88 - lámpara amarilla, indica paso de caja
-ENTRADA_LAMPARA_ROJA = 6077            # T77 - lámpara roja, indica paro
+ENTRADA_LAMPARA_VERDE = 6008           # T9 → addr 6008
+ENTRADA_LAMPARA_AMARILLA = 6087        # T88 → addr 6087
+ENTRADA_LAMPARA_ROJA = 6076            # T77 → addr 6076
 
 # --- Modo prueba: control de plumas ---
-ENTRADA_PLUMA_INICIO_SUBE = 6005       # T5 - levanta la pluma de inicio
-ENTRADA_PLUMA_INICIO_BAJA = 6006       # T6 - baja la pluma de inicio
-ENTRADA_PLUMA_FIN = 6007               # T7 - levanta/baja la pluma de fin
+ENTRADA_PLUMA_INICIO_SUBE = 6004       # T5 → addr 6004
+ENTRADA_PLUMA_INICIO_BAJA = 6005       # T6 → addr 6005
+ENTRADA_PLUMA_FIN = 6006               # T7 → addr 6006
 
 # --- Modo prueba: control de banda ---
-ENTRADA_BANDA_DERECHA = 6045           # T45 - arranca banda a la derecha
-ENTRADA_BANDA_IZQUIERDA = 6044         # T44 - arranca banda a la izquierda
-ENTRADA_BANDA_STOP = 6046              # T46 - detiene la banda
+ENTRADA_BANDA_DERECHA = 6044           # T45 → addr 6044
+ENTRADA_BANDA_IZQUIERDA = 6043         # T44 → addr 6043
+ENTRADA_BANDA_STOP = 6045              # T46 → addr 6045
 
 # --- Modo prueba: torreta manual ---
-ENTRADA_TORRETA_VERDE = 6345           # T345 - enciende lámpara verde
-ENTRADA_TORRETA_AMARILLA = 6346        # T346 - enciende lámpara amarilla
-ENTRADA_TORRETA_ROJA = 6347            # T347 - enciende lámpara roja
+ENTRADA_TORRETA_VERDE = 6344           # T345 → addr 6344
+ENTRADA_TORRETA_AMARILLA = 6345        # T346 → addr 6345
+ENTRADA_TORRETA_ROJA = 6346            # T347 → addr 6346
 
 # --- Modo individual: pilotos de estado UR3/banda (lectura) ---
-ENTRADA_SEB_LISTO = 6995              # T995 - banda media en posición de recibir caja
-ENTRADA_SEB_CAJA = 6998               # T998 - caja ya está en banda media
-ENTRADA_UR1 = 6997                    # T997 - UR3 ya puso caja en banda inicial
-ENTRADA_UR2 = 6996                    # T996 - UR3 ya puede poner otra caja
+ENTRADA_SEB_LISTO = 6994              # T995 → addr 6994
+ENTRADA_SEB_CAJA = 6997               # T998 → addr 6997
+ENTRADA_UR1 = 6996                    # T997 → addr 6996
+ENTRADA_UR2 = 6995                    # T996 → addr 6995
 
 # --- Entradas físicas (usar con manager.read_input) ---
 ENTRADA_INPUT_SENSOR_ENTRADA = 3      # I4 - sensor de entrada (censado)

@@ -1,12 +1,13 @@
 """
 CLI para escribir/leer variables directamente al PLC Entrada (HORNER_2).
 Uso:
-  T30 1       -> write_coil(6030, True)
-  T30 0       -> write_coil(6030, False)
-  T9          -> read_coil(6009)
+  T30 1       -> write_coil(6029, True)   [offset -1: addr = 5999 + n]
+  T30 0       -> write_coil(6029, False)
+  T9          -> read_coil(6008)
   R498 500    -> write_register(3497, 500)
   R508        -> read_register(3507)
   I4          -> read_discrete_input(3)
+  Q8          -> read_coil(7) [salidas fisicas]
   scan        -> lee todas las T conocidas y muestra su estado
   q           -> salir
 """
@@ -54,7 +55,7 @@ def parse_command(cmd: str):
         except ValueError:
             print(f"  Error: '{token}' no es una T valida")
             return
-        address = 6000 + num
+        address = 5999 + num
 
         if len(parts) >= 2:
             try:
@@ -124,36 +125,84 @@ def parse_command(cmd: str):
 
 def scan_coils():
     known = [
-        (6030, "T30 STOP (integracion)"),
-        (6099, "T99 INICIO (integracion)"),
-        (6033, "T33 STOP (individual)"),
-        (6999, "T999 INICIO (individual)"),
-        (6009, "T9 Lampara verde"),
-        (6088, "T88 Lampara amarilla"),
-        (6077, "T77 Lampara roja"),
-        (6005, "T5 Pluma inicio sube"),
-        (6006, "T6 Pluma inicio baja"),
-        (6007, "T7 Pluma fin"),
-        (6045, "T45 Banda derecha"),
-        (6044, "T44 Banda izquierda"),
-        (6046, "T46 Banda stop"),
-        (6345, "T345 Torreta verde"),
-        (6346, "T346 Torreta amarilla"),
-        (6347, "T347 Torreta roja"),
-        (6995, "T995 sebListo"),
-        (6998, "T998 sebCaja"),
-        (6997, "T997 UR1"),
-        (6996, "T996 UR2"),
+        (6029, "T30 STOP (integracion)"),
+        (6098, "T99 INICIO (integracion)"),
+        (6032, "T33 STOP (individual)"),
+        (6998, "T999 INICIO (individual)"),
+        (6008, "T9 Lampara verde"),
+        (6087, "T88 Lampara amarilla"),
+        (6076, "T77 Lampara roja"),
+        (6004, "T5 Pluma inicio sube"),
+        (6005, "T6 Pluma inicio baja"),
+        (6006, "T7 Pluma fin"),
+        (6044, "T45 Banda derecha"),
+        (6043, "T44 Banda izquierda"),
+        (6045, "T46 Banda stop"),
+        (6344, "T345 Torreta verde"),
+        (6345, "T346 Torreta amarilla"),
+        (6346, "T347 Torreta roja"),
+        (6994, "T995 sebListo"),
+        (6997, "T998 sebCaja"),
+        (6996, "T997 UR1"),
+        (6995, "T996 UR2"),
     ]
     print("  --- SCAN ENTRADA (HORNER_2) ---")
+    print("  --- Coils (T markers) ---")
     for addr, desc in known:
         result = client.read_coils(addr, count=1)
         if result and not result.isError():
             val = 1 if result.bits[0] else 0
             marker = " <--" if val else ""
-            print(f"  addr {addr} = {val}  | {desc}{marker}")
+            print(f"  addr {addr} = {val}{marker}  | {desc}")
         else:
-            print(f"  addr {addr} = ERR | {desc}")
+            print(f"  addr {addr} = ERR  | {desc}")
+
+    print()
+    print("  --- Salidas fisicas (Q) ---")
+    q_outputs = [
+        (5, "Q6 Pluma fin arriba"),
+        (6, "Q7 Pluma fin abajo"),
+        (7, "Q8 Pluma inicio arriba"),
+        (8, "Q9 Pluma inicio abajo"),
+    ]
+    for addr, desc in q_outputs:
+        result = client.read_coils(addr, count=1)
+        if result and not result.isError():
+            val = 1 if result.bits[0] else 0
+            marker = " <--" if val else ""
+            print(f"  addr {addr} = {val}{marker}  | {desc}")
+        else:
+            print(f"  addr {addr} = ERR  | {desc}")
+
+    print()
+    print("  --- Entradas fisicas (I) ---")
+    inputs = [
+        (3, "I4 Sensor entrada"),
+        (4, "I5 Sensor salida"),
+    ]
+    for addr, desc in inputs:
+        result = client.read_discrete_inputs(addr, count=1)
+        if result and not result.isError():
+            val = 1 if result.bits[0] else 0
+            marker = " <--" if val else ""
+            print(f"  addr {addr} = {val}{marker}  | {desc}")
+        else:
+            print(f"  addr {addr} = ERR  | {desc}")
+
+    print()
+    print("  --- Registros ---")
+    regs = [
+        (3497, "R498 - VFD escribir"),
+        (3507, "R508 - VFD leer"),
+    ]
+    for addr, desc in regs:
+        result = client.read_holding_registers(addr, count=1)
+        if result and not result.isError():
+            val = result.registers[0]
+            print(f"  addr {addr} = {val}  | {desc}")
+        else:
+            print(f"  addr {addr} = ERR  | {desc}")
+
     print("  --- FIN SCAN ---")
 
 

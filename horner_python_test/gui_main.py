@@ -394,10 +394,10 @@ class EntradaTab(QWidget):
         self._pulse_coil(ENTRADA_STOP, "STOP activado")
 
     def on_banda_izq(self):
-        self._pulse_coil(ENTRADA_BANDA_IZQUIERDA, "Banda izquierda")
+        self._pulse_coil(ENTRADA_BANDA_DERECHA, "Banda izquierda")
 
     def on_banda_der(self):
-        self._pulse_coil(ENTRADA_BANDA_DERECHA, "Banda derecha")
+        self._pulse_coil(ENTRADA_BANDA_IZQUIERDA, "Banda derecha")
 
     def on_banda_stop(self):
         self._pulse_coil(ENTRADA_BANDA_STOP, "Banda detenida")
