@@ -397,21 +397,40 @@ class EntradaTab(QWidget):
         sensores_layout.addWidget(self.led_pluma_fin_abajo, 2, 3)
         bot_row.addWidget(grp_sensores)
 
-        grp_ur3 = QGroupBox("UR3 / Integracion")
-        ur3_layout = QGridLayout(grp_ur3)
-        ur3_layout.addWidget(QLabel("sebListo:"), 0, 0)
-        self.led_seb_listo = LedIndicator()
-        ur3_layout.addWidget(self.led_seb_listo, 0, 1)
-        ur3_layout.addWidget(QLabel("sebCaja:"), 0, 2)
-        self.led_seb_caja = LedIndicator()
-        ur3_layout.addWidget(self.led_seb_caja, 0, 3)
-        ur3_layout.addWidget(QLabel("UR1:"), 1, 0)
-        self.led_ur1 = LedIndicator()
-        ur3_layout.addWidget(self.led_ur1, 1, 1)
-        ur3_layout.addWidget(QLabel("UR2:"), 1, 2)
-        self.led_ur2 = LedIndicator()
-        ur3_layout.addWidget(self.led_ur2, 1, 3)
-        bot_row.addWidget(grp_ur3)
+        grp_individual = QGroupBox("Modo Individual")
+        ind_layout = QGridLayout(grp_individual)
+
+        self.btn_ind_inicio = QPushButton("Inicio (T99)")
+        self.btn_ind_inicio.setStyleSheet(self._btn_style("#2f9e44"))
+        self.btn_ind_inicio.clicked.connect(self.on_ind_inicio)
+        ind_layout.addWidget(self.btn_ind_inicio, 0, 0)
+
+        self.btn_ind_stop = QPushButton("Stop (T33)")
+        self.btn_ind_stop.setStyleSheet(self._btn_style("#e03131"))
+        self.btn_ind_stop.clicked.connect(self.on_ind_stop)
+        ind_layout.addWidget(self.btn_ind_stop, 0, 1)
+
+        self.btn_seb_listo = QPushButton("sebListo (T995)")
+        self.btn_seb_listo.setStyleSheet(self._btn_style("#7048e8"))
+        self.btn_seb_listo.clicked.connect(self.on_seb_listo)
+        ind_layout.addWidget(self.btn_seb_listo, 1, 0)
+
+        self.btn_seb_caja = QPushButton("sebCaja (T998)")
+        self.btn_seb_caja.setStyleSheet(self._btn_style("#7048e8"))
+        self.btn_seb_caja.clicked.connect(self.on_seb_caja)
+        ind_layout.addWidget(self.btn_seb_caja, 1, 1)
+
+        self.btn_ur1 = QPushButton("UR1 (T997)")
+        self.btn_ur1.setStyleSheet(self._btn_style("#7048e8"))
+        self.btn_ur1.clicked.connect(self.on_ur1)
+        ind_layout.addWidget(self.btn_ur1, 2, 0)
+
+        self.btn_ur2 = QPushButton("UR2 (T996)")
+        self.btn_ur2.setStyleSheet(self._btn_style("#7048e8"))
+        self.btn_ur2.clicked.connect(self.on_ur2)
+        ind_layout.addWidget(self.btn_ur2, 2, 1)
+
+        bot_row.addWidget(grp_individual)
 
         layout.addLayout(bot_row)
 
@@ -512,6 +531,24 @@ class EntradaTab(QWidget):
     def on_torreta_roja_off(self):
         self._write_coil(ENTRADA_TORRETA_ROJA, False, "Torreta roja OFF")
 
+    def on_ind_inicio(self):
+        self._pulse_coil(ENTRADA_INICIO_INDIVIDUAL, "Inicio individual (T99)")
+
+    def on_ind_stop(self):
+        self._pulse_coil(ENTRADA_STOP_INDIVIDUAL, "Stop individual (T33)")
+
+    def on_seb_listo(self):
+        self._pulse_coil(ENTRADA_SEB_LISTO, "sebListo (T995)")
+
+    def on_seb_caja(self):
+        self._pulse_coil(ENTRADA_SEB_CAJA, "sebCaja (T998)")
+
+    def on_ur1(self):
+        self._pulse_coil(ENTRADA_UR1, "UR1 (T997)")
+
+    def on_ur2(self):
+        self._pulse_coil(ENTRADA_UR2, "UR2 (T996)")
+
     def on_vfd_escribir(self):
         text = self.input_vfd.text().strip()
         if not text:
@@ -556,15 +593,6 @@ class EntradaTab(QWidget):
                 self.manager.read_coil(self.PLC_ID, ENTRADA_PLUMA_FIN_ARRIBA))
             self.led_pluma_fin_abajo.update_state(
                 self.manager.read_coil(self.PLC_ID, ENTRADA_PLUMA_FIN_ABAJO))
-
-            self.led_seb_listo.update_state(
-                self.manager.read_coil(self.PLC_ID, ENTRADA_SEB_LISTO))
-            self.led_seb_caja.update_state(
-                self.manager.read_coil(self.PLC_ID, ENTRADA_SEB_CAJA))
-            self.led_ur1.update_state(
-                self.manager.read_coil(self.PLC_ID, ENTRADA_UR1))
-            self.led_ur2.update_state(
-                self.manager.read_coil(self.PLC_ID, ENTRADA_UR2))
 
             vfd_value = self.manager.read_register(self.PLC_ID, ENTRADA_VFD_LEER)
             self.lbl_vfd_actual.setText(f"{vfd_value} Hz")
