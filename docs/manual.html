@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual SCADA - Bandas Automatizadas | Horner XL4</title>
+    <style>
+        :root {
+            --primary: #4263eb;
+            --success: #2f9e44;
+            --danger: #e03131;
+            --warning: #f08c00;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light: #f8f9fa;
+            --border: #dee2e6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--dark);
+            background: var(--light);
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            color: var(--primary);
+            margin-bottom: 8px;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 12px;
+        }
+
+        h2 {
+            font-size: 1.6rem;
+            color: var(--dark);
+            margin-top: 48px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-top: 32px;
+            margin-bottom: 12px;
+        }
+
+        h4 {
+            font-size: 1rem;
+            color: var(--gray);
+            margin-top: 20px;
+            margin-bottom: 8px;
+        }
+
+        p {
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            color: var(--gray);
+            font-size: 1.1rem;
+            margin-bottom: 32px;
+        }
+
+        code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background: #1e1e2e;
+            color: #cdd6f4;
+            padding: 16px 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 12px 0 20px 0;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        pre .comment { color: #6c7086; }
+        pre .cmd { color: #89b4fa; }
+        pre .output { color: #a6adc8; }
+
+        .alert {
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin: 16px 0;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background: #e7f5ff;
+            border-color: var(--primary);
+            color: #1864ab;
+        }
+
+        .alert-warning {
+            background: #fff9db;
+            border-color: var(--warning);
+            color: #e67700;
+        }
+
+        .alert-danger {
+            background: #ffe3e3;
+            border-color: var(--danger);
+            color: #c92a2a;
+        }
+
+        .alert-success {
+            background: #d3f9d8;
+            border-color: var(--success);
+            color: #2b8a3e;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 10px 14px;
+            text-align: left;
+            border: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background: #f1f3f5;
+        }
+
+        tr:hover {
+            background: #e7f5ff;
+        }
+
+        .toc {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px 28px;
+            margin: 24px 0;
+        }
+
+        .toc h3 {
+            margin-top: 0;
+            color: var(--dark);
+        }
+
+        .toc ol {
+            padding-left: 20px;
+        }
+
+        .toc li {
+            margin: 6px 0;
+        }
+
+        .toc a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        .network-diagram {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            margin: 16px 0;
+            overflow-x: auto;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .badge-blue { background: var(--primary); }
+        .badge-green { background: var(--success); }
+        .badge-red { background: var(--danger); }
+        .badge-orange { background: var(--warning); }
+
+        ul, ol {
+            padding-left: 24px;
+            margin-bottom: 12px;
+        }
+
+        li {
+            margin-bottom: 4px;
+        }
+
+        .formula {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 12px 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 32px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 20px 16px; }
+            h1 { font-size: 1.6rem; }
+            h2 { font-size: 1.3rem; }
+            table { font-size: 0.8rem; }
+            th, td { padding: 6px 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <h1>Manual SCADA - Bandas Automatizadas</h1>
+        <p class="subtitle">Sistema de control para 3 PLCs Horner XL4 via Modbus TCP/IP</p>
+
+        <div class="toc">
+            <h3>Contenido</h3>
+            <ol>
+                <li><a href="#intro">Descripcion General del Sistema</a></li>
+                <li><a href="#requisitos">Requisitos de Hardware y Software</a></li>
+                <li><a href="#instalacion">Instalacion Paso a Paso</a></li>
+                <li><a href="#red">Configuracion de Red</a></li>
+                <li><a href="#ejecucion">Ejecucion del Sistema</a></li>
+                <li><a href="#gui">Uso de la Interfaz Grafica (GUI)</a></li>
+                <li><a href="#cli">Uso de las Herramientas CLI</a></li>
+                <li><a href="#modbus">Referencia Modbus - Direcciones y Offsets</a></li>
+                <li><a href="#plc-entrada">PLC Entrada (HORNER_2) - Mapa Completo</a></li>
+                <li><a href="#plc-central">PLC Central (HORNER_3) - Mapa Completo</a></li>
+                <li><a href="#plc-salida">PLC Salida (HORNER_1) - Mapa Completo</a></li>
+                <li><a href="#arquitectura">Arquitectura del Codigo</a></li>
+                <li><a href="#troubleshooting">Solucion de Problemas</a></li>
+            </ol>
+        </div>
+
+        <!-- ================================================================ -->
+        <h2 id="intro">1. Descripcion General del Sistema</h2>
+
+        <p>Este sistema SCADA controla 3 bandas transportadoras automatizadas, cada una gestionada por un PLC Horner XL4. La comunicacion se realiza mediante el protocolo <strong>Modbus TCP/IP</strong> a traves de una red Ethernet local.</p>
+
+        <h3>Los 3 PLCs del sistema</h3>
+        <table>
+            <tr>
+                <th>ID Interno</th>
+                <th>IP</th>
+                <th>Funcion</th>
+                <th>Descripcion</th>
+            </tr>
+            <tr>
+                <td><code>HORNER_2</code></td>
+                <td>192.168.3.132</td>
+                <td>Banda de Entrada</td>
+                <td>Recibe cajas, plumas de inicio/fin, torreta, VFD</td>
+            </tr>
+            <tr>
+                <td><code>HORNER_3</code></td>
+                <td>192.168.3.133</td>
+                <td>Banda Central (Rotatoria)</td>
+                <td>Rotador, banda lineal, torreta, sensores</td>
+            </tr>
+            <tr>
+                <td><code>HORNER_1</code></td>
+                <td>192.168.3.131</td>
+                <td>Banda de Salida</td>
+                <td>LEDs, plumas entrada/salida, VFD, maquina de estados</td>
+            </tr>
+        </table>
+
+        <div class="network-diagram">
+<pre style="background:none;color:var(--dark);padding:0;margin:0;">
+    PC (SCADA)                    Red 192.168.3.x
+   ┌──────────┐                   Puerto 502 (Modbus TCP)
+   │ Python   │
+   │ GUI/CLI  │───────┬──────────── HORNER_2 (192.168.3.132) ── Banda Entrada
+   │          │       │
+   │ PySide6  │       ├──────────── HORNER_3 (192.168.3.133) ── Banda Central
+   │ pymodbus │       │
+   └──────────┘       └──────────── HORNER_1 (192.168.3.131) ── Banda Salida
+</pre>
+        </div>
+
+        <!-- ================================================================ -->
+        <h2 id="requisitos">2. Requisitos de Hardware y Software</h2>
+
+        <h3>Hardware</h3>
+        <ul>
+            <li>PC con puerto Ethernet (o adaptador USB-Ethernet)</li>
+            <li>Cable Ethernet conectado a la misma red que los PLCs (192.168.3.x)</li>
+            <li>Los 3 PLCs Horner XL4 encendidos y en la red</li>
+        </ul>
+
+        <h3>Software</h3>
+        <ul>
+            <li><strong>Python 3.10 o superior</strong> (recomendado 3.12+)</li>
+            <li><strong>pip</strong> (viene incluido con Python)</li>
+            <li><strong>git</strong> (para clonar el repositorio)</li>
+        </ul>
+
+        <h3>Verificar Python</h3>
+        <pre><span class="cmd">python3 --version</span>
+<span class="output">Python 3.12.x</span></pre>
+
+        <p>Si no tienes Python:</p>
+        <ul>
+            <li><strong>Windows:</strong> Descarga desde <code>python.org/downloads</code>. Marca "Add Python to PATH" durante la instalacion.</li>
+            <li><strong>macOS:</strong> <code>brew install python</code> (con Homebrew) o descarga de python.org</li>
+            <li><strong>Linux:</strong> <code>sudo apt install python3 python3-pip python3-venv</code></li>
+        </ul>
+
+        <!-- ================================================================ -->
+        <h2 id="instalacion">3. Instalacion Paso a Paso</h2>
+
+        <h3>Paso 1: Clonar el repositorio</h3>
+        <pre><span class="cmd">git clone https://github.com/Adr1anBaz/scada_python_modbus_primavera2026.git</span>
+<span class="cmd">cd scada_python_modbus_primavera2026</span></pre>
+
+        <h3>Paso 2: Crear un entorno virtual (opcional pero recomendado)</h3>
+
+        <div class="alert alert-info">
+            <strong>Que es un entorno virtual?</strong> Es una carpeta aislada donde se instalan las dependencias del proyecto sin afectar el Python global de tu sistema. No es obligatorio, pero evita conflictos con otras aplicaciones Python.
+        </div>
+
+        <pre><span class="comment"># Crear el entorno virtual</span>
+<span class="cmd">python3 -m venv venv</span>
+
+<span class="comment"># Activarlo:</span>
+<span class="comment"># En macOS/Linux:</span>
+<span class="cmd">source venv/bin/activate</span>
+
+<span class="comment"># En Windows (CMD):</span>
+<span class="cmd">venv\Scripts\activate</span>
+
+<span class="comment"># En Windows (PowerShell):</span>
+<span class="cmd">venv\Scripts\Activate.ps1</span></pre>
+
+        <p>Cuando el entorno esta activo veras <code>(venv)</code> al inicio de tu terminal. Para desactivarlo: <code>deactivate</code>.</p>
+
+        <div class="alert alert-warning">
+            <strong>Si no quieres usar entorno virtual:</strong> Puedes instalar las dependencias directamente con <code>pip install</code>. Funcionara igual, solo que las librerias se instalaran globalmente.
+        </div>
+
+        <h3>Paso 3: Instalar dependencias</h3>
+        <pre><span class="cmd">pip install -r requirements.txt</span></pre>
+
+        <p>Esto instala:</p>
+        <ul>
+            <li><strong>PySide6</strong> - Framework para la interfaz grafica (Qt6)</li>
+            <li><strong>pymodbus</strong> - Libreria para comunicacion Modbus TCP</li>
+        </ul>
+
+        <p>Si prefieres instalar manualmente:</p>
+        <pre><span class="cmd">pip install PySide6 pymodbus</span></pre>
+
+        <!-- ================================================================ -->
+        <h2 id="red">4. Configuracion de Red</h2>
+
+        <p>Tu PC debe estar en la misma subred que los PLCs: <strong>192.168.3.x</strong></p>
+
+        <h3>Configurar IP estatica en tu PC</h3>
+        <table>
+            <tr>
+                <th>Parametro</th>
+                <th>Valor</th>
+            </tr>
+            <tr>
+                <td>IP</td>
+                <td>192.168.3.100 (o cualquier IP libre en el rango .1-.254, excepto .131, .132, .133)</td>
+            </tr>
+            <tr>
+                <td>Mascara de subred</td>
+                <td>255.255.255.0</td>
+            </tr>
+            <tr>
+                <td>Gateway</td>
+                <td>192.168.3.1 (o dejar vacio)</td>
+            </tr>
+        </table>
+
+        <h3>Verificar conectividad</h3>
+        <pre><span class="cmd">ping 192.168.3.131</span>  <span class="comment"># HORNER_1 (Salida)</span>
+<span class="cmd">ping 192.168.3.132</span>  <span class="comment"># HORNER_2 (Entrada)</span>
+<span class="cmd">ping 192.168.3.133</span>  <span class="comment"># HORNER_3 (Central)</span></pre>
+
+        <div class="alert alert-danger">
+            <strong>Si no hace ping:</strong> Verifica que el cable Ethernet esta conectado, que tu IP esta en el rango correcto, y que los PLCs estan encendidos. En Windows puede ser necesario desactivar el firewall temporalmente.
+        </div>
+
+        <!-- ================================================================ -->
+        <h2 id="ejecucion">5. Ejecucion del Sistema</h2>
+
+        <h3>Ejecutar la GUI (interfaz grafica)</h3>
+        <pre><span class="cmd">cd horner_python_test</span>
+<span class="cmd">python3 gui_main.py</span></pre>
+
+        <h3>Ejecutar los CLI (linea de comandos)</h3>
+        <pre><span class="comment"># CLI para PLC de Entrada:</span>
+<span class="cmd">python3 cli_entrada.py</span>
+
+<span class="comment"># CLI para PLC Central:</span>
+<span class="cmd">python3 cli_central.py</span>
+
+<span class="comment"># CLI para PLC de Salida:</span>
+<span class="cmd">python3 cli_salida.py</span></pre>
+
+        <!-- ================================================================ -->
+        <h2 id="gui">6. Uso de la Interfaz Grafica (GUI)</h2>
+
+        <p>La GUI tiene 3 pestanas, una por cada PLC. Cada pestana tiene su propio boton de conexion independiente.</p>
+
+        <h3>Flujo general</h3>
+        <ol>
+            <li>Abre la GUI</li>
+            <li>Ve a la pestana del PLC que quieres controlar</li>
+            <li>Presiona <strong>CONECTAR</strong> (debe cambiar a "ONLINE" en verde)</li>
+            <li>Usa los botones de control</li>
+        </ol>
+
+        <h3>Pestana Entrada (HORNER_2)</h3>
+        <h4>Navegacion (modos de pantalla)</h4>
+        <p>Los modos se <strong>mantienen activos</strong> (hold). Al cambiar a otro modo, el anterior se libera automaticamente.</p>
+        <ul>
+            <li><strong>Integracion</strong> - Activa T51 (pantalla modo integracion)</li>
+            <li><strong>Individual</strong> - Activa T52 (pantalla modo individual)</li>
+            <li><strong>Prueba</strong> - Activa T53 (pantalla modo prueba). Habilita controles de banda/plumas/torreta.</li>
+            <li><strong>Salir Prueba</strong> - Libera todos los modos (regresa al menu principal)</li>
+        </ul>
+
+        <div class="alert alert-warning">
+            <strong>Importante:</strong> Los botones de Banda, Plumas y Torreta solo funcionan cuando estas en Modo Prueba (T53 activo). Si no estas en prueba, apareceran deshabilitados (grises).
+        </div>
+
+        <h4>Control (Modo Integracion)</h4>
+        <ul>
+            <li><strong>INICIO</strong> - Pulsa T99, inicia el proceso</li>
+            <li><strong>STOP</strong> - Pulsa T30, frena todo el sistema</li>
+        </ul>
+
+        <h4>Modo Individual</h4>
+        <ul>
+            <li><strong>Inicio (T99)</strong> - Inicia el proceso en modo individual</li>
+            <li><strong>Stop (T33)</strong> - Stop en modo individual</li>
+            <li><strong>sebListo (T995)</strong> - Banda media en posicion de recibir caja</li>
+            <li><strong>sebCaja (T998)</strong> - Caja ya esta en banda media</li>
+            <li><strong>UR1 (T997)</strong> - UR3 ya puso caja en banda inicial</li>
+            <li><strong>UR2 (T996)</strong> - UR3 ya puede poner otra caja</li>
+        </ul>
+
+        <h4>Modo Prueba (solo disponible con T53 activo)</h4>
+        <ul>
+            <li><strong>Banda:</strong> Izquierda (T44), Derecha (T46), Stop (T45)</li>
+            <li><strong>Pluma Inicio:</strong> Sube (T5), Baja (T6)</li>
+            <li><strong>Pluma Fin:</strong> Sube (T7), Baja (T8)</li>
+            <li><strong>Torreta:</strong> Verde ON/OFF (T345), Amarilla ON/OFF (T346), Roja ON/OFF (T347)</li>
+            <li><strong>VFD:</strong> Escribir frecuencia (R498), Leer actual (R508)</li>
+        </ul>
+
+        <h3>Pestana Central (HORNER_3)</h3>
+        <h4>Navegacion</h4>
+        <ul>
+            <li><strong>Proceso</strong> - Pulsa T76</li>
+            <li><strong>Integracion</strong> - Pulsa T70</li>
+            <li><strong>Prueba</strong> - Toggle T51 (entra/sale del modo prueba)</li>
+            <li><strong>Menu</strong> - Pulsa T53 (regresa al menu principal)</li>
+        </ul>
+
+        <div class="alert alert-info">
+            En Central, el boton Prueba es un <strong>toggle</strong>: lo presionas una vez para entrar, otra vez para salir. El sistema lee T52 para saber si estas en modo prueba.
+        </div>
+
+        <h4>Control (Proceso/Integracion)</h4>
+        <ul>
+            <li><strong>STOP</strong> - Pulsa T49</li>
+            <li><strong>Llego caja</strong> - Pulsa T24</li>
+            <li><strong>Recibio B3</strong> - Pulsa T28</li>
+            <li><strong>UR3 Fin</strong> - Pulsa T79</li>
+            <li><strong>B3 Lista</strong> - Pulsa T98</li>
+        </ul>
+
+        <h4>Modo Prueba</h4>
+        <ul>
+            <li><strong>Rotador:</strong> Antihorario (T63), Horario (T55), Stop (T56)</li>
+            <li><strong>Banda:</strong> Adelante (T58*), Atras (T57*), Stop (T59)</li>
+            <li><strong>Torreta:</strong> Verde (T60), Amarillo (T61), Rojo (T54)</li>
+        </ul>
+        <p><small>*Nota: Las direcciones de banda estan invertidas internamente (Adelante usa la senal ATRAS y viceversa) porque los motores estan cableados al reves.</small></p>
+
+        <h3>Pestana Salida (HORNER_1)</h3>
+        <h4>Control</h4>
+        <ul>
+            <li><strong>Init Proceso</strong> - Escribe bit 2 de R170 (pasa Estado 0 a 1)</li>
+            <li><strong>STOP</strong> - Escribe bit 7 de R170</li>
+        </ul>
+
+        <h4>LEDs</h4>
+        <ul>
+            <li><strong>Verde ON/OFF</strong> - R170.6</li>
+            <li><strong>Amarillo ON/OFF</strong> - R170.5</li>
+            <li><strong>Rojo ON/OFF</strong> - R170.4</li>
+        </ul>
+
+        <h4>Banda</h4>
+        <ul>
+            <li><strong>Izq</strong> - Escribe 5376 en R100</li>
+            <li><strong>Off</strong> - Escribe 5377 en R100</li>
+            <li><strong>Der</strong> - Escribe 5378 en R100</li>
+            <li><strong>T12</strong> - Toggle del bit 12 de R170 (banda salida enclavable)</li>
+        </ul>
+
+        <h4>Plumas</h4>
+        <ul>
+            <li><strong>Pluma Entrada:</strong> Abrir (R170.6), Cerrar (R170.8)</li>
+            <li><strong>Pluma Salida:</strong> Sube toggle (R170.9), Baja toggle (R170.10)</li>
+        </ul>
+
+        <!-- ================================================================ -->
+        <h2 id="cli">7. Uso de las Herramientas CLI</h2>
+
+        <p>Los CLI permiten leer y escribir variables directamente a cada PLC. Son utiles para diagnosticar y probar sin la GUI.</p>
+
+        <h3>CLI Entrada (cli_entrada.py)</h3>
+        <pre><span class="cmd">python3 cli_entrada.py</span>
+<span class="output">Conectando a HORNER_2 (192.168.3.132:502)...</span>
+<span class="output">Conectado.</span>
+
+<span class="comment"># Escribir una T (ejemplo: activar T99)</span>
+entrada> <span class="cmd">T99 1</span>
+<span class="output">  OK: T99 (addr 6098) = 1</span>
+
+<span class="comment"># Leer una T</span>
+entrada> <span class="cmd">T9</span>
+<span class="output">  T9 (addr 6008) = 0</span>
+
+<span class="comment"># Leer una entrada fisica</span>
+entrada> <span class="cmd">I4</span>
+<span class="output">  I4 (addr 3) = 1</span>
+
+<span class="comment"># Leer una salida (Q)</span>
+entrada> <span class="cmd">Q8</span>
+<span class="output">  Q8 (addr 7) = 1</span>
+
+<span class="comment"># Escribir un registro</span>
+entrada> <span class="cmd">R498 300</span>
+<span class="output">  OK: R498 (addr 3497) = 300</span>
+
+<span class="comment"># Escanear todo</span>
+entrada> <span class="cmd">scan</span>
+
+<span class="comment"># Salir</span>
+entrada> <span class="cmd">q</span></pre>
+
+        <h3>CLI Salida (cli_salida.py)</h3>
+        <pre><span class="cmd">python3 cli_salida.py</span>
+<span class="output">Conectando a HORNER_1 (192.168.3.131:502)...</span>
+
+<span class="comment"># Escribir un bit del registro R170</span>
+salida> <span class="cmd">B6 1</span>
+<span class="output">  OK: R170.6 = 1  | LED verde / abrir pluma entrada</span>
+
+<span class="comment"># Leer un bit</span>
+salida> <span class="cmd">B6</span>
+<span class="output">  R170.6 = 1  | LED verde / abrir pluma entrada</span>
+
+<span class="comment"># Leer un registro</span>
+salida> <span class="cmd">R1</span>
+<span class="output">  R1 (addr 3000) = 3</span>
+
+<span class="comment"># Leer entrada fisica</span>
+salida> <span class="cmd">I4</span>
+<span class="output">  I4 (addr 3) = 0  | Sensor salida</span>
+
+<span class="comment"># Escanear todo</span>
+salida> <span class="cmd">scan</span></pre>
+
+        <!-- ================================================================ -->
+        <h2 id="modbus">8. Referencia Modbus - Direcciones y Offsets</h2>
+
+        <div class="alert alert-danger">
+            <strong>OFFSET CRITICO:</strong> Las marcas T en Horner tienen un offset de -1 respecto a lo que indica la documentacion del fabricante. Este es el error mas comun al programar estos PLCs via Modbus.
+        </div>
+
+        <h3>Formula para T-markers (Coils)</h3>
+        <div class="formula">
+            <strong>Direccion Modbus = 5999 + N</strong><br>
+            <small>Donde N es el numero de T-marker en la documentacion Horner</small>
+        </div>
+
+        <p>Ejemplo: Si la documentacion dice <strong>T99</strong>, la direccion real en Modbus es:</p>
+        <pre>5999 + 99 = <strong>6098</strong></pre>
+
+        <div class="alert alert-warning">
+            <strong>Por que el offset?</strong> El Horner XL4 numera sus T-markers desde 1 (T1, T2, T3...) pero en la interfaz Modbus las direcciones son 0-indexed. La base es 6000, pero como Horner arranca en 1, la formula real es 5999 + N. La documentacion PDF del PLC dice "T99 = direccion 6099" pero eso es INCORRECTO para Modbus TCP — el real es 6098.
+        </div>
+
+        <h3>Formula para Registros (R)</h3>
+        <div class="formula">
+            <strong>Direccion Modbus = 2999 + N</strong><br>
+            <small>Donde N es el numero de registro R en Horner</small>
+        </div>
+
+        <p>Ejemplo: <strong>R498</strong> → 2999 + 498 = <strong>3497</strong></p>
+
+        <div class="alert alert-success">
+            Los registros (R) NO necesitan offset adicional. La formula 2999 + N funciona correctamente como esta documentada.
+        </div>
+
+        <h3>Formula para Bits de Registro</h3>
+        <div class="formula">
+            <strong>Los bits del registro se usan directamente (sin offset)</strong><br>
+            <small>R170.6 = bit 6 del registro en direccion 3169</small>
+        </div>
+
+        <div class="alert alert-warning">
+            <strong>Excepcion confirmada para LEDs de SALIDA (R170):</strong> El LED verde de la documentacion dice ".7" pero en realidad es <strong>.6</strong>, el amarillo dice ".6" pero es <strong>.5</strong>. STOP dice ".6" pero es <strong>.7</strong>. Los demas bits estan correctos. Esto ya esta corregido en el codigo.
+        </div>
+
+        <h3>Entradas Fisicas (I)</h3>
+        <div class="formula">
+            <strong>Direccion Modbus = N - 1</strong><br>
+            <small>I1 = 0, I2 = 1, I3 = 2, I4 = 3, I5 = 4</small>
+        </div>
+
+        <h3>Salidas Fisicas (Q)</h3>
+        <div class="formula">
+            <strong>Direccion Modbus = N - 1</strong><br>
+            <small>Q1 = 0, Q2 = 1, ..., Q8 = 7, Q9 = 8</small>
+        </div>
+
+        <h3>Tabla resumen de offsets</h3>
+        <table>
+            <tr>
+                <th>Tipo</th>
+                <th>Ejemplo</th>
+                <th>Formula</th>
+                <th>Direccion Real</th>
+                <th>Funcion Modbus</th>
+            </tr>
+            <tr>
+                <td>T-marker (coil)</td>
+                <td>T99</td>
+                <td>5999 + 99</td>
+                <td>6098</td>
+                <td>01/05 (Read/Write Coil)</td>
+            </tr>
+            <tr>
+                <td>Registro</td>
+                <td>R498</td>
+                <td>2999 + 498</td>
+                <td>3497</td>
+                <td>03/06 (Read/Write Register)</td>
+            </tr>
+            <tr>
+                <td>Entrada (I)</td>
+                <td>I4</td>
+                <td>4 - 1</td>
+                <td>3</td>
+                <td>02 (Read Discrete Input)</td>
+            </tr>
+            <tr>
+                <td>Salida (Q)</td>
+                <td>Q8</td>
+                <td>8 - 1</td>
+                <td>7</td>
+                <td>01 (Read Coil)</td>
+            </tr>
+            <tr>
+                <td>Bit de registro</td>
+                <td>R170.6</td>
+                <td>bit 6 de addr 3169</td>
+                <td>3169</td>
+                <td>03+06 (Read-Modify-Write)</td>
+            </tr>
+        </table>
+
+        <!-- ================================================================ -->
+        <h2 id="plc-entrada">9. PLC Entrada (HORNER_2) - Mapa Completo</h2>
+
+        <p><span class="badge badge-blue">IP: 192.168.3.132</span> <span class="badge badge-green">ID: HORNER_2</span></p>
+
+        <h3>Navegacion HMI</h3>
+        <table>
+            <tr><th>Nombre</th><th>T-marker</th><th>Addr Modbus</th><th>Tipo</th><th>Descripcion</th></tr>
+            <tr><td>Modo Integracion</td><td>T51</td><td>6050</td><td>HOLD</td><td>Mantener activo para estar en pantalla integracion</td></tr>
+            <tr><td>Modo Individual</td><td>T52</td><td>6051</td><td>HOLD</td><td>Mantener activo para estar en pantalla individual</td></tr>
+            <tr><td>Modo Prueba</td><td>T53</td><td>6052</td><td>HOLD</td><td>Mantener activo para modo prueba. Al soltar regresa al menu</td></tr>
+        </table>
+
+        <h3>Control General</h3>
+        <table>
+            <tr><th>Nombre</th><th>T-marker</th><th>Addr Modbus</th><th>Tipo</th><th>Descripcion</th></tr>
+            <tr><td>STOP (integracion)</td><td>T30</td><td>6029</td><td>Pulso</td><td>Frena todo el sistema</td></tr>
+            <tr><td>INICIO</td><td>T99</td><td>6098</td><td>Pulso</td><td>Inicia el proceso (integracion e individual)</td></tr>
+            <tr><td>STOP (individual)</td><td>T33</td><td>6032</td><td>Pulso</td><td>Stop en modo individual</td></tr>
+        </table>
+
+        <h3>Pilotos / Lamparas (lectura)</h3>
+        <table>
+            <tr><th>Nombre</th><th>T-marker</th><th>Addr Modbus</th><th>Descripcion</th></tr>
+            <tr><td>Lampara Verde</td><td>T9</td><td>6008</td><td>Indica sistema listo/activo</td></tr>
+            <tr><td>Lampara Amarilla</td><td>T88</td><td>6087</td><td>Indica paso de caja</td></tr>
+            <tr><td>Lampara Roja</td><td>T77</td><td>6076</td><td>Indica paro</td></tr>
+        </table>
+
+        <h3>Control de Plumas (Modo Prueba)</h3>
+        <table>
+            <tr><th>Nombre</th><th>T-marker</th><th>Addr Modbus</th><th>Tipo</th></tr>
+            <tr><td>Pluma Inicio Sube</td><td>T5</td><td>6004</td><td>Pulso</td></tr>
+            <tr><td>Pluma Inicio Baja</td><td>T6</td><td>6005</td><td>Pulso</td></tr>
+            <tr><td>Pluma Fin Sube</td><td>T7</td><td>6006</td><td>Pulso</td></tr>
+            <tr><td>Pluma Fin Baja</td><td>T8</td><td>6007</td><td>Pulso</td></tr>
+        </table>
+
+        <h3>Control de Banda (Modo Prueba)</h3>
+        <table>
+            <tr><th>Nombre</th><th>T-marker</th><th>Addr Modbus</th><th>Tipo</th></tr>
+            <tr><td>Banda Izquierda</td><td>T44</td><td>6043</td><td>Pulso</td></tr>
+            <tr><td>Banda Stop/Paro</td><td>T45</td><td>6044</td><td>Pulso</td></tr>
+            <tr><td>Banda Derecha</td><td>T46</td><td>6045</td><td>Pulso</td></tr>
+        </table>
+
+        <h3>Torreta (Modo Prueba)</h3>
+        <table>
+            <tr><th>Nombre</th><th>T-marker</th><th>Addr Modbus</th><th>Tipo</th></tr>
+            <tr><td>Torreta Verde</td><td>T345</td><td>6344</td><td>ON/OFF</td></tr>
+            <tr><td>Torreta Amarilla</td><td>T346</td><td>6345</td><td>ON/OFF</td></tr>
+            <tr><td>Torreta Roja</td><td>T347</td><td>6346</td><td>ON/OFF</td></tr>
+        </table>
+
+        <h3>Senales Modo Individual</h3>
+        <table>
+            <tr><th>Nombre</th><th>T-marker</th><th>Addr Modbus</th><th>Tipo</th><th>Descripcion</th></tr>
+            <tr><td>sebListo</td><td>T995</td><td>6994</td><td>Pulso</td><td>Banda media en posicion de recibir caja</td></tr>
+            <tr><td>UR1</td><td>T997</td><td>6996</td><td>Pulso</td><td>UR3 ya puso caja en banda inicial</td></tr>
+            <tr><td>sebCaja</td><td>T998</td><td>6997</td><td>Pulso</td><td>Caja ya esta en banda media</td></tr>
+            <tr><td>UR2</td><td>T996</td><td>6995</td><td>Pulso</td><td>UR3 ya puede poner otra caja</td></tr>
+        </table>
+
+        <h3>Entradas Fisicas</h3>
+        <table>
+            <tr><th>Nombre</th><th>Input</th><th>Addr Modbus</th><th>Descripcion</th></tr>
+            <tr><td>Sensor Entrada</td><td>I4</td><td>3</td><td>Detecta caja entrando</td></tr>
+            <tr><td>Sensor Salida</td><td>I5</td><td>4</td><td>Detecta caja saliendo</td></tr>
+        </table>
+
+        <h3>Salidas Fisicas (lectura)</h3>
+        <table>
+            <tr><th>Nombre</th><th>Output</th><th>Addr Modbus</th><th>Descripcion</th></tr>
+            <tr><td>Pluma Fin Arriba</td><td>Q6</td><td>5</td><td>LED indica pluma fin arriba</td></tr>
+            <tr><td>Pluma Fin Abajo</td><td>Q7</td><td>6</td><td>LED indica pluma fin abajo</td></tr>
+            <tr><td>Pluma Inicio Arriba</td><td>Q8</td><td>7</td><td>LED indica pluma inicio arriba</td></tr>
+            <tr><td>Pluma Inicio Abajo</td><td>Q9</td><td>8</td><td>LED indica pluma inicio abajo</td></tr>
+        </table>
+
+        <h3>Registros</h3>
+        <table>
+            <tr><th>Nombre</th><th>Registro</th><th>Addr Modbus</th><th>Descripcion</th></tr>
+            <tr><td>VFD Escribir</td><td>R498</td><td>3497</td><td>Escribir frecuencia del variador</td></tr>
+            <tr><td>VFD Leer</td><td>R508</td><td>3507</td><td>Leer frecuencia actual del variador</td></tr>
+        </table>
+
+        <!-- ================================================================ -->
+        <h2 id="plc-central">10. PLC Central (HORNER_3) - Mapa Completo</h2>
+
+        <p><span class="badge badge-blue">IP: 192.168.3.133</span> <span class="badge badge-green">ID: HORNER_3</span></p>
+
+        <h3>Navegacion HMI</h3>
+        <table>
+            <tr><th>Nombre</th><th>T-marker</th><th>Addr Modbus</th><th>Tipo</th><th>Descripcion</th></tr>
+            <tr><td>Modo Proceso</td><td>T76</td><td>6075</td><td>Pulso</td><td>Va a pantalla de proceso</td></tr>
+            <tr><td>Modo Integracion</td><td>T70</td><td>6069</td><td>Pulso</td><td>Va a pantalla de integracion</td></tr>
+            <tr><td>Modo Prueba</td><td>T51</td><td>6050</td><td>Toggle</td><td>Entra/sale de modo prueba</td></tr>
+            <tr><td>Prueba Activo</td><td>T52</td><td>6051</td><td>Lectura</td><td>1 = estoy en modo prueba</td></tr>
+            <tr><td>Menu</td><td>T53</td><td>6052</td><td>Pulso</td><td>Regresa al menu principal</td></tr>
+        </table>
+
+        <h3>Control General</h3>
+        <table>
+            <tr><th>Nombre</th><th>T-marker</th><th>Addr Modbus</th><th>Tipo</th></tr>
+            <tr><td>STOP</td><td>T49</td><td>6048</td><td>Pulso</td></tr>
+        </table>
+
+        <h3>Senales de Proceso/Integracion</h3>
+        <table>
+            <tr><th>Nombre</th><th>T-marker</th><th>Addr Modbus</th><th>Tipo</th><th>Descripcion</th></tr>
+            <tr><td>Llego Caja</td><td>T24</td><td>6023</td><td>Pulso</td><td>Senal: llego una caja</td></tr>
+            <tr><td>Recibio Banda 3</td><td>T28</td><td>6027</td><td>Pulso</td><td>Senal: recibio de banda 3</td></tr>
+            <tr><td>UR3 Fin</td><td>T79</td><td>6078</td><td>Pulso</td><td>Senal: UR3 termino</td></tr>
+            <tr><td>Banda 3 Lista</td><td>T98</td><td>6097</td><td>Pulso</td><td>Senal: banda 3 lista para recibir</td></tr>
+        </table>
+
+        <h3>Pilotos de Estado (lectura)</h3>
+        <table>
+            <tr><th>Nombre</th><th>T-marker</th><th>Addr Modbus</th><th>Descripcion</th></tr>
+            <tr><td>Recibido</td><td>T26</td><td>6025</td><td>Piloto: caja recibida</td></tr>
+            <tr><td>Listo</td><td>T34</td><td>6033</td><td>Piloto: listo para empezar</td></tr>
+        </table>
+
+        <h3>Rotador (Modo Prueba)</h3>
+        <table>
+            <tr><th>Nombre</th><th>T-marker</th><th>Addr Modbus</th><th>Tipo</th></tr>
+            <tr><td>Antihorario</td><td>T63</td><td>6062</td><td>Pulso</td></tr>
+            <tr><td>Horario</td><td>T55</td><td>6054</td><td>Pulso</td></tr>
+            <tr><td>Stop</td><td>T56</td><td>6055</td><td>Pulso</td></tr>
+        </table>
+
+        <h3>Banda (Modo Prueba)</h3>
+        <table>
+            <tr><th>Nombre</th><th>T-marker</th><th>Addr Modbus</th><th>Tipo</th><th>Nota</th></tr>
+            <tr><td>Adelante</td><td>T57</td><td>6056</td><td>Pulso</td><td>En GUI usa T58 (invertido por cableado)</td></tr>
+            <tr><td>Atras</td><td>T58</td><td>6057</td><td>Pulso</td><td>En GUI usa T57 (invertido por cableado)</td></tr>
+            <tr><td>Stop</td><td>T59</td><td>6058</td><td>Pulso</td><td></td></tr>
+        </table>
+
+        <h3>Torreta (Modo Prueba)</h3>
+        <table>
+            <tr><th>Nombre</th><th>T-marker</th><th>Addr Modbus</th><th>Tipo</th></tr>
+            <tr><td>Verde</td><td>T60</td><td>6059</td><td>ON/OFF</td></tr>
+            <tr><td>Amarillo</td><td>T61</td><td>6060</td><td>ON/OFF</td></tr>
+            <tr><td>Rojo</td><td>T54</td><td>6053</td><td>ON/OFF</td></tr>
+        </table>
+
+        <h3>Diagnostico - Pilotos (lectura)</h3>
+        <table>
+            <tr><th>Nombre</th><th>T-marker</th><th>Addr Modbus</th></tr>
+            <tr><td>Sensor Salida</td><td>T64</td><td>6063</td></tr>
+            <tr><td>Sensor Entrada</td><td>T65</td><td>6064</td></tr>
+            <tr><td>Sensor Giro</td><td>T66</td><td>6065</td></tr>
+            <tr><td>Boton Verde</td><td>T67</td><td>6066</td></tr>
+            <tr><td>Boton Rojo</td><td>T68</td><td>6067</td></tr>
+            <tr><td>Boton Paro</td><td>T69</td><td>6068</td></tr>
+        </table>
+
+        <!-- ================================================================ -->
+        <h2 id="plc-salida">11. PLC Salida (HORNER_1) - Mapa Completo</h2>
+
+        <p><span class="badge badge-blue">IP: 192.168.3.131</span> <span class="badge badge-green">ID: HORNER_1</span></p>
+
+        <div class="alert alert-info">
+            <strong>Diferencia importante:</strong> Este PLC NO usa T-markers. Usa un <strong>registro de control (R170)</strong> donde cada bit es una senal diferente. Para escribir un bit, primero se lee el registro completo, se modifica el bit deseado, y se escribe de vuelta.
+        </div>
+
+        <h3>Registro de Control: R170 (Direccion 3169)</h3>
+        <table>
+            <tr><th>Bit</th><th>Nombre</th><th>Tipo</th><th>Descripcion</th></tr>
+            <tr><td>.0</td><td>Modo Int → Proc</td><td>Pulso</td><td>Cambia de integracion a proceso</td></tr>
+            <tr><td>.1</td><td>Modo Proc → Int</td><td>Pulso</td><td>Cambia de proceso a integracion</td></tr>
+            <tr><td>.2</td><td>Init Proceso</td><td>Pulso</td><td>Pasa Estado 0 a Estado 1</td></tr>
+            <tr><td>.3</td><td>Modo Proc → Ind</td><td>Pulso</td><td>Cambia de proceso a individual</td></tr>
+            <tr><td>.4</td><td>LED Rojo</td><td>ON/OFF</td><td>Enciende/apaga LED rojo</td></tr>
+            <tr><td>.5</td><td>LED Amarillo</td><td>ON/OFF</td><td>Enciende/apaga LED amarillo</td></tr>
+            <tr><td>.6</td><td>LED Verde / Pluma Ent. Abrir</td><td>ON/OFF</td><td>Enciende LED verde / abre pluma entrada</td></tr>
+            <tr><td>.7</td><td>STOP</td><td>ON/OFF</td><td>Stop / paro del sistema</td></tr>
+            <tr><td>.8</td><td>Pluma Entrada Cerrar</td><td>ON/OFF</td><td>Cierra pluma de entrada</td></tr>
+            <tr><td>.9</td><td>Pluma Salida Abrir (Sube)</td><td>Toggle</td><td>Sube pluma de salida (invertir valor actual)</td></tr>
+            <tr><td>.10</td><td>Pluma Salida Cerrar (Baja)</td><td>Toggle</td><td>Baja pluma de salida (invertir valor actual)</td></tr>
+            <tr><td>.11</td><td>Modo Ind → Proc</td><td>Pulso</td><td>Cambia de individual a proceso</td></tr>
+            <tr><td>.12</td><td>Banda Salida</td><td>Toggle</td><td>Control enclavable de banda de salida</td></tr>
+        </table>
+
+        <h3>Switch de Banda: R100 (Direccion 3099)</h3>
+        <table>
+            <tr><th>Valor</th><th>Accion</th></tr>
+            <tr><td>5376</td><td>Banda Izquierda</td></tr>
+            <tr><td>5377</td><td>Banda Off (detenida)</td></tr>
+            <tr><td>5378</td><td>Banda Derecha</td></tr>
+        </table>
+
+        <h3>Registros Adicionales</h3>
+        <table>
+            <tr><th>Nombre</th><th>Registro</th><th>Addr Modbus</th><th>Descripcion</th></tr>
+            <tr><td>VFD Escribir</td><td>R498</td><td>3497</td><td>Escribir frecuencia del variador</td></tr>
+            <tr><td>VFD Leer</td><td>R508</td><td>3507</td><td>Leer frecuencia actual</td></tr>
+            <tr><td>Maquina de Estados</td><td>R1</td><td>3000</td><td>Estado actual del proceso (0, 1, 2...)</td></tr>
+        </table>
+
+        <h3>Entradas Fisicas</h3>
+        <table>
+            <tr><th>Nombre</th><th>Input</th><th>Addr Modbus</th><th>Descripcion</th></tr>
+            <tr><td>Boton NA</td><td>I1</td><td>0</td><td>Boton normalmente abierto</td></tr>
+            <tr><td>Boton NC</td><td>I2</td><td>1</td><td>Boton normalmente cerrado</td></tr>
+            <tr><td>Emergencia</td><td>I3</td><td>2</td><td>Boton de emergencia (NC)</td></tr>
+            <tr><td>Sensor Salida</td><td>I4</td><td>3</td><td>Sensor optico de salida</td></tr>
+            <tr><td>Sensor Entrada</td><td>I5</td><td>4</td><td>Sensor optico de entrada</td></tr>
+        </table>
+
+        <!-- ================================================================ -->
+        <h2 id="arquitectura">12. Arquitectura del Codigo</h2>
+
+        <pre>
+horner_python_test/
+├── gui_main.py              ← Interfaz grafica principal (PySide6)
+├── cli_entrada.py           ← CLI para PLC Entrada
+├── cli_central.py           ← CLI para PLC Central
+├── cli_salida.py            ← CLI para PLC Salida
+└── system/
+    ├── __init__.py          ← Exporta PLCManager
+    ├── config.py            ← Configuracion de IPs y puertos
+    ├── constants.py         ← TODAS las direcciones Modbus
+    ├── events.py            ← Sistema de eventos interno
+    ├── plc_device.py        ← Abstraccion de un PLC individual
+    └── plc_manager.py       ← Gestor de multiples PLCs
+        </pre>
+
+        <h3>Flujo de datos</h3>
+        <ol>
+            <li>La GUI o CLI llama al <code>PLCManager</code></li>
+            <li>El Manager delega al <code>PLCDevice</code> correcto (por ID)</li>
+            <li>El Device usa <code>pymodbus</code> para enviar/recibir datos via TCP</li>
+            <li>El PLC Horner recibe la instruccion Modbus y actua</li>
+        </ol>
+
+        <h3>Como agregar una nueva senal</h3>
+        <ol>
+            <li>Agrega la constante en <code>system/constants.py</code> (aplica offset -1 para T)</li>
+            <li>Agrega el boton/LED en la clase del tab correspondiente en <code>gui_main.py</code></li>
+            <li>Conecta el boton a una funcion que llame <code>_pulse_coil()</code> o <code>_write_coil()</code></li>
+        </ol>
+
+        <!-- ================================================================ -->
+        <h2 id="troubleshooting">13. Solucion de Problemas</h2>
+
+        <h3>"No se pudo conectar al PLC"</h3>
+        <ul>
+            <li>Verifica que tu PC esta en la red 192.168.3.x</li>
+            <li>Haz ping al PLC: <code>ping 192.168.3.131</code></li>
+            <li>Verifica que el PLC esta encendido y el cable Ethernet conectado</li>
+            <li>El puerto 502 debe estar libre (ningun otro software Modbus corriendo)</li>
+        </ul>
+
+        <h3>"ModuleNotFoundError: No module named 'PySide6'"</h3>
+        <ul>
+            <li>Ejecuta <code>pip install -r requirements.txt</code></li>
+            <li>Si usas entorno virtual, asegurate de que esta activado (<code>source venv/bin/activate</code>)</li>
+        </ul>
+
+        <h3>"El boton no hace nada" / "El LED no responde"</h3>
+        <ul>
+            <li>Verifica que el PLC esta conectado (dice "ONLINE" en verde)</li>
+            <li>Para Entrada: verifica que estas en el modo correcto (Prueba para banda/plumas/torreta)</li>
+            <li>Usa el CLI para probar la senal directamente y descartar problema de GUI</li>
+        </ul>
+
+        <h3>"La banda va al reves"</h3>
+        <ul>
+            <li>Esto ya esta corregido en el codigo (las senales de direccion estan invertidas internamente)</li>
+            <li>Si persiste, intercambia los valores en <code>constants.py</code> para esa banda</li>
+        </ul>
+
+        <h3>"El scan muestra todos los valores en 0"</h3>
+        <ul>
+            <li>El PLC puede estar en una pantalla diferente a la esperada</li>
+            <li>Navega primero al modo correcto (Prueba, Integracion, etc.) antes de activar senales</li>
+        </ul>
+
+        <h3>"Error escribiendo registro" o "Timeout"</h3>
+        <ul>
+            <li>El PLC puede estar saturado. Espera 1-2 segundos y reintenta</li>
+            <li>Verifica que solo una instancia del programa esta conectada al PLC</li>
+            <li>Si persiste, desconecta y reconecta</li>
+        </ul>
+
+        <hr>
+        <p style="text-align:center; color: var(--gray); margin-top: 40px;">
+            Manual generado para el proyecto SCADA Bandas Automatizadas<br>
+            Universidad Iberoamericana — Primavera 2026
+        </p>
+
+    </div>
+</body>
+</html>
