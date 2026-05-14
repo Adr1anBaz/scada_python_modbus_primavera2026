@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual UR3 - Comunicacion Modbus TCP con PLC Horner via Windows Router</title>
+    <style>
+        :root {
+            --primary: #4263eb;
+            --success: #2f9e44;
+            --danger: #e03131;
+            --warning: #f08c00;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light: #f8f9fa;
+            --border: #dee2e6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--dark);
+            background: var(--light);
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            color: var(--primary);
+            margin-bottom: 8px;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 12px;
+        }
+
+        h2 {
+            font-size: 1.6rem;
+            color: var(--dark);
+            margin-top: 48px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-top: 32px;
+            margin-bottom: 12px;
+        }
+
+        h4 {
+            font-size: 1rem;
+            color: var(--gray);
+            margin-top: 20px;
+            margin-bottom: 8px;
+        }
+
+        p {
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            color: var(--gray);
+            font-size: 1.1rem;
+            margin-bottom: 32px;
+        }
+
+        code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background: #1e1e2e;
+            color: #cdd6f4;
+            padding: 16px 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 12px 0 20px 0;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        pre .comment { color: #6c7086; }
+        pre .cmd { color: #89b4fa; }
+        pre .output { color: #a6adc8; }
+
+        .alert {
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin: 16px 0;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background: #e7f5ff;
+            border-color: var(--primary);
+            color: #1864ab;
+        }
+
+        .alert-warning {
+            background: #fff9db;
+            border-color: var(--warning);
+            color: #e67700;
+        }
+
+        .alert-danger {
+            background: #ffe3e3;
+            border-color: var(--danger);
+            color: #c92a2a;
+        }
+
+        .alert-success {
+            background: #d3f9d8;
+            border-color: var(--success);
+            color: #2b8a3e;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 10px 14px;
+            text-align: left;
+            border: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background: #f1f3f5;
+        }
+
+        tr:hover {
+            background: #e7f5ff;
+        }
+
+        .toc {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px 28px;
+            margin: 24px 0;
+        }
+
+        .toc h3 {
+            margin-top: 0;
+            color: var(--dark);
+        }
+
+        .toc ol {
+            padding-left: 20px;
+        }
+
+        .toc li {
+            margin: 6px 0;
+        }
+
+        .toc a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        .network-diagram {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            margin: 16px 0;
+            overflow-x: auto;
+        }
+
+        ul, ol {
+            padding-left: 24px;
+            margin-bottom: 12px;
+        }
+
+        li {
+            margin-bottom: 4px;
+        }
+
+        .formula {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 12px 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 32px 0;
+        }
+
+        img.doc-img {
+            width: 100%;
+            max-width: 700px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin: 16px 0;
+            display: block;
+        }
+
+        .img-caption {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-top: -10px;
+            margin-bottom: 16px;
+            font-style: italic;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin-right: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 20px 16px; }
+            h1 { font-size: 1.6rem; }
+            h2 { font-size: 1.3rem; }
+            table { font-size: 0.8rem; }
+            th, td { padding: 6px 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <h1>Manual UR3 - Comunicacion Modbus TCP</h1>
+        <p class="subtitle">Conexion de un robot UR3 (red 192.168.1.x) con PLCs Horner (red 192.168.3.x) usando una PC Windows como router</p>
+
+        <div class="toc">
+            <h3>Contenido</h3>
+            <ol>
+                <li><a href="#panorama">Panorama General</a></li>
+                <li><a href="#restriccion">Por que el UR3 esta en la red .1 (restriccion del Eye Box)</a></li>
+                <li><a href="#topologia">Topologia de Red y Direcciones IP</a></li>
+                <li><a href="#conceptos">Conceptos de Red Necesarios</a></li>
+                <li><a href="#router">Como Funciona Windows como Router</a></li>
+                <li><a href="#config-ur3">Configuracion del UR3</a></li>
+                <li><a href="#config-windows">Configuracion de Windows (Dos Interfaces)</a></li>
+                <li><a href="#forwarding">Habilitar IP Forwarding en Windows</a></li>
+                <li><a href="#config-plc">Configuracion del PLC Horner</a></li>
+                <li><a href="#modbus-horner">Configurar Modbus Client en Horner (Cscape)</a></li>
+                <li><a href="#verificacion">Verificacion y Diagnostico</a></li>
+                <li><a href="#comandos">Referencia de Comandos Windows</a></li>
+                <li><a href="#errores">Errores Comunes y Soluciones</a></li>
+                <li><a href="#checklist">Checklist Operativo</a></li>
+            </ol>
+        </div>
+
+        <!-- ================================================================ -->
+        <h2 id="panorama">1. Panorama General</h2>
+
+        <p>El sistema integra un robot <strong>UR3</strong> (Universal Robots) con los PLCs Horner XL4 del sistema de bandas. El robot manipula cajas usando una garra OnRobot controlada por un dispositivo llamado <strong>Eye Box</strong>.</p>
+
+        <p>El problema fundamental es que el UR3 y los PLCs estan en <strong>redes diferentes</strong>:</p>
+
+        <table>
+            <tr>
+                <th>Equipo</th>
+                <th>Red</th>
+                <th>Razon</th>
+            </tr>
+            <tr>
+                <td>Robot UR3 + Eye Box</td>
+                <td><code>192.168.1.0/24</code></td>
+                <td>El Eye Box esta configurado de fabrica en esta red</td>
+            </tr>
+            <tr>
+                <td>PLCs Horner</td>
+                <td><code>192.168.3.0/24</code></td>
+                <td>Red del sistema de bandas transportadoras</td>
+            </tr>
+        </table>
+
+        <p>Para que el PLC Horner se comunique con el UR3 via Modbus TCP, se utiliza una <strong>PC Windows con dos interfaces de red</strong> que actua como router entre ambas redes.</p>
+
+        <img src="img_ur_3.jpg" alt="Robot UR3 con garra OnRobot" class="doc-img">
+        <p class="img-caption">Robot UR3 con garra OnRobot montada. La garra se controla via el Eye Box.</p>
+
+        <!-- ================================================================ -->
+        <h2 id="restriccion">2. Por que el UR3 esta en la red .1</h2>
+
+        <div class="alert alert-warning">
+            <strong>Restriccion de hardware:</strong> El dispositivo OnRobot Eye Box viene preconfigurado en la red <code>192.168.1.x</code> y requiere que el robot UR3 este en la misma subred para comunicarse con la garra.
+        </div>
+
+        <p>El <strong>OnRobot Eye Box</strong> es el controlador de la garra robotica. Este dispositivo:</p>
+        <ul>
+            <li>Tiene una IP fija en el rango <code>192.168.1.x</code></li>
+            <li>Se conecta al UR3 por Ethernet para enviar comandos a la garra</li>
+            <li>Requiere que el robot este en la misma subred (<code>192.168.1.0/24</code>)</li>
+        </ul>
+
+        <img src="img_ur_1.jpg" alt="OnRobot Eye Box" class="doc-img">
+        <p class="img-caption">OnRobot Eye Box con conexiones Ethernet (cable azul) y alimentacion 24V. Este dispositivo obliga al UR3 a permanecer en la red 192.168.1.x.</p>
+
+        <p>Como no se puede cambiar la red del Eye Box sin riesgo de perder la comunicacion con la garra, la solucion es mantener al UR3 en la red <code>.1</code> y usar la PC como puente hacia la red <code>.3</code> donde estan los PLCs.</p>
+
+        <div class="alert alert-info">
+            <strong>En resumen:</strong> El Eye Box fuerza al UR3 a quedarse en la red .1. La PC Windows resuelve esto actuando como router entre las dos redes.
+        </div>
+
+        <!-- ================================================================ -->
+        <h2 id="topologia">3. Topologia de Red y Direcciones IP</h2>
+
+        <div class="network-diagram">
+<pre style="background:none;color:var(--dark);padding:0;margin:0;">
+   Red 192.168.1.0/24                         Red 192.168.3.0/24
+   (Robot + Eye Box)                           (PLCs Horner)
+
+┌─────────────┐                              ┌─────────────────┐
+│  Eye Box    │                              │ HORNER_1 (.131) │
+│  192.168.1.x│                              │ HORNER_2 (.132) │
+└──────┬──────┘                              │ HORNER_3 (.133) │
+       │                                     └────────┬────────┘
+┌──────┴──────┐     ┌──────────────────┐              │
+│    UR3      │     │   PC Windows     │              │
+│ 192.168.1.76├─────┤ .1.28    │  .3.228├─────────────┘
+└─────────────┘     │  (Ethernet) (Wi-Fi)│
+   gw: .1.28        └──────────────────┘
+                         IP Forwarding
+                           Enabled
+</pre>
+        </div>
+
+        <h3>Tabla de direcciones IP</h3>
+        <table>
+            <tr>
+                <th>Equipo</th>
+                <th>IP</th>
+                <th>Mascara</th>
+                <th>Gateway</th>
+                <th>Red</th>
+            </tr>
+            <tr>
+                <td>UR3</td>
+                <td><code>192.168.1.76</code></td>
+                <td><code>255.255.255.0</code></td>
+                <td><code>192.168.1.28</code></td>
+                <td><code>192.168.1.0/24</code></td>
+            </tr>
+            <tr>
+                <td>PC Windows (Ethernet → robot)</td>
+                <td><code>192.168.1.28</code></td>
+                <td><code>255.255.255.0</code></td>
+                <td>(vacio)</td>
+                <td><code>192.168.1.0/24</code></td>
+            </tr>
+            <tr>
+                <td>PC Windows (Wi-Fi → PLCs)</td>
+                <td><code>192.168.3.228</code></td>
+                <td><code>255.255.255.0</code></td>
+                <td><code>192.168.3.1</code></td>
+                <td><code>192.168.3.0/24</code></td>
+            </tr>
+            <tr>
+                <td>PLC Horner (el que habla con UR3)</td>
+                <td><code>192.168.3.12</code></td>
+                <td><code>255.255.255.0</code></td>
+                <td><code>192.168.3.228</code></td>
+                <td><code>192.168.3.0/24</code></td>
+            </tr>
+        </table>
+
+        <!-- ================================================================ -->
+        <h2 id="conceptos">4. Conceptos de Red Necesarios</h2>
+
+        <h3>Subred</h3>
+        <p>Un grupo de equipos que comparten un rango de IPs y pueden comunicarse directamente entre si sin necesitar un router. La notacion <code>/24</code> significa mascara <code>255.255.255.0</code> (los primeros 3 octetos identifican la red, el ultimo identifica al equipo).</p>
+
+        <h3>Gateway (puerta de enlace)</h3>
+        <p>Es la IP del equipo al que un dispositivo envia paquetes cuando el destino esta en otra red. Si el UR3 quiere hablar con un PLC en la red <code>.3</code>, envia el trafico a su gateway (<code>192.168.1.28</code> = la PC Windows).</p>
+
+        <h3>Router</h3>
+        <p>Equipo con interfaces en dos o mas redes que reenvía paquetes entre ellas. En este caso, la PC Windows cumple ese rol porque tiene una interfaz en la red <code>.1</code> y otra en la red <code>.3</code>.</p>
+
+        <h3>IP Forwarding</h3>
+        <p>Funcion del sistema operativo que permite reenviar paquetes de una interfaz de red a otra. Por defecto Windows NO lo hace (solo procesa paquetes dirigidos a si mismo). Hay que habilitarlo explicitamente.</p>
+
+        <!-- ================================================================ -->
+        <h2 id="router">5. Como Funciona Windows como Router</h2>
+
+        <p>La PC Windows tiene dos interfaces de red activas simultaneamente:</p>
+        <ul>
+            <li><strong>Ethernet:</strong> conectada fisicamente al UR3 (<code>192.168.1.28</code>)</li>
+            <li><strong>Wi-Fi:</strong> conectada a la red de PLCs (<code>192.168.3.228</code>)</li>
+        </ul>
+
+        <img src="img_ur_4.jpg" alt="PC Windows con conexiones de red" class="doc-img">
+        <p class="img-caption">Parte trasera de la PC Windows mostrando las conexiones Ethernet (cable azul hacia el UR3) y de red.</p>
+
+        <h3>Flujo de un paquete PLC → UR3</h3>
+        <ol>
+            <li>El PLC quiere enviar datos a <code>192.168.1.76</code> (el UR3)</li>
+            <li>Como esa IP no esta en su red local <code>.3</code>, envia el trafico a su gateway: <code>192.168.3.228</code> (la PC)</li>
+            <li>Windows recibe el paquete por su interfaz Wi-Fi</li>
+            <li>Windows ve que la red <code>192.168.1.0/24</code> esta conectada directamente por su interfaz Ethernet</li>
+            <li>Windows reenvia el paquete al UR3 por Ethernet</li>
+            <li>El UR3 responde enviando a su gateway <code>192.168.1.28</code> (la PC)</li>
+            <li>Windows devuelve la respuesta al PLC por Wi-Fi</li>
+        </ol>
+
+        <!-- ================================================================ -->
+        <h2 id="config-ur3">6. Configuracion del UR3</h2>
+
+        <p>En el Teach Pendant del robot:</p>
+        <ol>
+            <li>Ir a <strong>Setup → Network</strong></li>
+            <li>Seleccionar <strong>Static Address</strong></li>
+            <li>Configurar:
+                <table>
+                    <tr><th>Parametro</th><th>Valor</th></tr>
+                    <tr><td>IP Address</td><td><code>192.168.1.76</code></td></tr>
+                    <tr><td>Subnet Mask</td><td><code>255.255.255.0</code></td></tr>
+                    <tr><td>Default Gateway</td><td><code>192.168.1.28</code></td></tr>
+                </table>
+            </li>
+            <li>Aplicar y reiniciar la interfaz de red del robot</li>
+        </ol>
+
+        <div class="alert alert-info">
+            <strong>El gateway es clave:</strong> Sin gateway configurado, el UR3 solo puede hablar con equipos en su propia red (.1). El gateway <code>192.168.1.28</code> le dice al robot "para alcanzar otras redes, manda los paquetes a la PC Windows".
+        </div>
+
+        <img src="img_ur_2.jpg" alt="Controlador UR3" class="doc-img">
+        <p class="img-caption">Controlador del UR3 con las conexiones Ethernet visibles en la parte inferior.</p>
+
+        <!-- ================================================================ -->
+        <h2 id="config-windows">7. Configuracion de Windows (Dos Interfaces)</h2>
+
+        <h3>Interfaz Ethernet (hacia el robot)</h3>
+        <table>
+            <tr><th>Parametro</th><th>Valor</th></tr>
+            <tr><td>IP</td><td><code>192.168.1.28</code></td></tr>
+            <tr><td>Mascara</td><td><code>255.255.255.0</code></td></tr>
+            <tr><td>Gateway</td><td>(vacio - no poner nada)</td></tr>
+        </table>
+
+        <div class="alert alert-warning">
+            <strong>No poner gateway en la interfaz Ethernet.</strong> Si se pone gateway aqui, Windows puede confundirse sobre por donde sacar el trafico. El gateway solo va en la interfaz que tiene salida a internet o a la red principal (Wi-Fi en este caso).
+        </div>
+
+        <h3>Interfaz Wi-Fi (hacia los PLCs)</h3>
+        <table>
+            <tr><th>Parametro</th><th>Valor</th></tr>
+            <tr><td>IP</td><td><code>192.168.3.228</code></td></tr>
+            <tr><td>Mascara</td><td><code>255.255.255.0</code></td></tr>
+            <tr><td>Gateway</td><td><code>192.168.3.1</code> (o el gateway de esa red)</td></tr>
+        </table>
+
+        <h3>Verificar con ipconfig</h3>
+        <pre><span class="cmd">ipconfig</span>
+
+<span class="output">Adaptador Ethernet:</span>
+<span class="output">   Direccion IPv4. . . . . . . : 192.168.1.28</span>
+<span class="output">   Mascara de subred . . . . . : 255.255.255.0</span>
+<span class="output">   Puerta de enlace  . . . . . :</span>
+
+<span class="output">Adaptador Wi-Fi 3:</span>
+<span class="output">   Direccion IPv4. . . . . . . : 192.168.3.228</span>
+<span class="output">   Mascara de subred . . . . . : 255.255.255.0</span>
+<span class="output">   Puerta de enlace  . . . . . : 192.168.3.1</span></pre>
+
+        <!-- ================================================================ -->
+        <h2 id="forwarding">8. Habilitar IP Forwarding en Windows</h2>
+
+        <p>Por defecto Windows no reenvia paquetes entre interfaces. Hay que habilitarlo manualmente desde <strong>PowerShell como Administrador</strong>.</p>
+
+        <h3>Paso 1: Habilitar forwarding en ambas interfaces</h3>
+        <pre><span class="cmd">Set-NetIPInterface -InterfaceAlias "Ethernet" -Forwarding Enabled</span>
+<span class="cmd">Set-NetIPInterface -InterfaceAlias "Wi-Fi 3" -Forwarding Enabled</span></pre>
+
+        <div class="alert alert-warning">
+            <strong>Nota:</strong> Los nombres de interfaz ("Ethernet", "Wi-Fi 3") pueden variar segun el equipo. Usar <code>Get-NetIPInterface</code> para ver los nombres exactos.
+        </div>
+
+        <h3>Paso 2: Verificar que forwarding esta activo</h3>
+        <pre><span class="cmd">Get-NetIPInterface -AddressFamily IPv4 | Format-Table ifIndex,InterfaceAlias,Forwarding,ConnectionState</span></pre>
+
+        <p>Debe mostrar <code>Enabled</code> en las interfaces Ethernet y Wi-Fi.</p>
+
+        <h3>Paso 3: Habilitar el ruteo global IPv4</h3>
+        <pre><span class="comment"># Verificar valor actual:</span>
+<span class="cmd">Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -Name IPEnableRouter</span>
+
+<span class="comment"># Si no esta en 1, activarlo:</span>
+<span class="cmd">New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -Name IPEnableRouter -PropertyType DWord -Value 1 -Force</span></pre>
+
+        <div class="alert alert-danger">
+            <strong>Requiere reinicio.</strong> Despues de cambiar <code>IPEnableRouter</code> a 1, reiniciar la PC para que tome efecto.
+        </div>
+
+        <h3>Paso 4: Verificar la tabla de rutas</h3>
+        <pre><span class="cmd">route print</span></pre>
+
+        <p>Deben aparecer rutas directas (On-link) para ambas redes:</p>
+        <pre><span class="output">192.168.1.0    255.255.255.0    On-link    192.168.1.28</span>
+<span class="output">192.168.3.0    255.255.255.0    On-link    192.168.3.228</span></pre>
+
+        <div class="alert alert-danger">
+            <strong>Ruta incorrecta:</strong> Si aparece una ruta de <code>192.168.1.0</code> saliendo por <code>192.168.3.228</code>, esta mal configurada y debe eliminarse con: <code>route delete 192.168.1.0</code>
+        </div>
+
+        <!-- ================================================================ -->
+        <h2 id="config-plc">9. Configuracion del PLC Horner</h2>
+
+        <p>El PLC que se comunicara con el UR3 debe tener configurado un gateway que apunte a la PC Windows:</p>
+
+        <table>
+            <tr><th>Parametro</th><th>Valor</th></tr>
+            <tr><td>IP del PLC</td><td><code>192.168.3.12</code></td></tr>
+            <tr><td>Mascara</td><td><code>255.255.255.0</code></td></tr>
+            <tr><td>Gateway</td><td><code>192.168.3.228</code></td></tr>
+        </table>
+
+        <div class="alert alert-info">
+            <strong>Por que este gateway?</strong> Desde el punto de vista del PLC, la red <code>192.168.1.0/24</code> (donde esta el UR3) no es su red local. Para alcanzarla, necesita enviar el trafico a un router. La PC Windows en <code>192.168.3.228</code> es ese router.
+        </div>
+
+        <p>Esto se configura en <strong>Cscape</strong> dentro de la configuracion del puerto Ethernet del PLC.</p>
+
+        <!-- ================================================================ -->
+        <h2 id="modbus-horner">10. Configurar Modbus Client en Horner (Cscape)</h2>
+
+        <h3>Activar el protocolo</h3>
+        <p>En Cscape, dentro de la configuracion LAN del PLC:</p>
+        <ul>
+            <li>Ir a la configuracion del puerto Ethernet</li>
+            <li>En <strong>Downloadable Protocol</strong>, seleccionar: <code>Modbus Client</code></li>
+        </ul>
+
+        <p>Esto hace que el PLC sea el <strong>cliente</strong> Modbus/TCP que se conecta activamente al UR3 (servidor).</p>
+
+        <h3>Crear el dispositivo UR3</h3>
+        <p>Definir un nuevo dispositivo con:</p>
+        <table>
+            <tr><th>Campo</th><th>Valor</th></tr>
+            <tr><td>Name</td><td><code>UR3</code></td></tr>
+            <tr><td>Target IP</td><td><code>192.168.1.76</code></td></tr>
+            <tr><td>Port</td><td><code>502</code></td></tr>
+            <tr><td>Addressing</td><td><code>Modicon PLC 5-Digit Addressing</code></td></tr>
+        </table>
+
+        <h3>Configurar el Scan List</h3>
+        <p>El scan list define que registros se intercambian ciclicamente entre el PLC y el UR3. Ejemplo minimo:</p>
+
+        <table>
+            <tr><th>Campo</th><th>Valor</th><th>Explicacion</th></tr>
+            <tr><td>Device Register</td><td><code>40002</code></td><td>Registro Modbus del UR3 a leer/escribir</td></tr>
+            <tr><td>Length</td><td><code>1</code></td><td>Cantidad de registros</td></tr>
+            <tr><td>Local Register</td><td><code>%R00004</code></td><td>Registro local del Horner donde se guarda el valor</td></tr>
+            <tr><td>Update Type</td><td><code>Polled Read/Write</code></td><td>Lectura y escritura ciclica</td></tr>
+        </table>
+
+        <p>Esto significa: el Horner intercambiara ciclicamente el valor de su registro local <code>%R00004</code> con el registro Modbus remoto <code>40002</code> del UR3.</p>
+
+        <!-- ================================================================ -->
+        <h2 id="verificacion">11. Verificacion y Diagnostico</h2>
+
+        <h3>Desde la PC Windows</h3>
+        <pre><span class="comment"># Verificar que la PC llega al robot:</span>
+<span class="cmd">ping 192.168.1.76</span>
+
+<span class="comment"># Verificar tabla ARP (el robot debe aparecer):</span>
+<span class="cmd">arp -a</span>
+
+<span class="comment"># Verificar trafico en puerto Modbus:</span>
+<span class="cmd">netstat -ano | findstr :502</span></pre>
+
+        <h3>Desde el PLC (Cscape)</h3>
+        <ol>
+            <li>Descargar el proyecto al PLC</li>
+            <li>Poner en modo Run</li>
+            <li>Observar el valor de <code>%R00004</code> (o el registro local configurado)</li>
+            <li>Forzar valores de prueba (4, 0, 8, 5) para verificar que se escriben al UR3</li>
+        </ol>
+
+        <h3>Desde el UR3</h3>
+        <ul>
+            <li>En el Teach Pendant, revisar la seccion de I/O → Modbus</li>
+            <li>Verificar que los registros esperados estan expuestos</li>
+            <li>Si no hay cambios a pesar de que la red funciona, el problema es de mapeo de registros en el lado UR</li>
+        </ul>
+
+        <!-- ================================================================ -->
+        <h2 id="comandos">12. Referencia de Comandos Windows</h2>
+
+        <table>
+            <tr>
+                <th>Comando</th>
+                <th>Funcion</th>
+            </tr>
+            <tr>
+                <td><code>ipconfig</code></td>
+                <td>Ver IPs, mascaras y gateways de cada interfaz</td>
+            </tr>
+            <tr>
+                <td><code>ping 192.168.1.76</code></td>
+                <td>Verificar conectividad IP con el UR3</td>
+            </tr>
+            <tr>
+                <td><code>arp -a</code></td>
+                <td>Ver tabla ARP (direcciones MAC conocidas en la red local)</td>
+            </tr>
+            <tr>
+                <td><code>route print</code></td>
+                <td>Ver tabla de rutas (por donde salen los paquetes hacia cada red)</td>
+            </tr>
+            <tr>
+                <td><code>Get-NetIPInterface</code></td>
+                <td>Ver estado IP de cada interfaz, incluyendo forwarding</td>
+            </tr>
+            <tr>
+                <td><code>Set-NetIPInterface -Forwarding Enabled</code></td>
+                <td>Activar reenvio IP en una interfaz</td>
+            </tr>
+            <tr>
+                <td><code>Get-ItemProperty ... IPEnableRouter</code></td>
+                <td>Verificar si el ruteo global IPv4 esta activo</td>
+            </tr>
+            <tr>
+                <td><code>netstat -ano | findstr :502</code></td>
+                <td>Ver conexiones TCP en el puerto 502 (Modbus)</td>
+            </tr>
+        </table>
+
+        <!-- ================================================================ -->
+        <h2 id="errores">13. Errores Comunes y Soluciones</h2>
+
+        <h3>El ping al UR3 no responde desde Windows</h3>
+        <ul>
+            <li>Verificar que el cable Ethernet esta conectado entre la PC y el controlador del UR3</li>
+            <li>Verificar que la interfaz Ethernet de la PC tiene IP <code>192.168.1.28</code></li>
+            <li>Verificar que el UR3 tiene IP <code>192.168.1.76</code> con mascara <code>255.255.255.0</code></li>
+            <li>Verificar que el firewall de Windows no bloquea ICMP</li>
+        </ul>
+
+        <h3>El PLC no llega al UR3</h3>
+        <ul>
+            <li>Verificar que el gateway del PLC es <code>192.168.3.228</code></li>
+            <li>Verificar que IP Forwarding esta habilitado en ambas interfaces de Windows</li>
+            <li>Verificar que <code>IPEnableRouter = 1</code> en el registro de Windows</li>
+            <li>Verificar con <code>route print</code> que no hay rutas conflictivas</li>
+        </ul>
+
+        <h3>Hay ping pero Modbus no funciona</h3>
+        <ul>
+            <li>El UR3 debe tener el servidor Modbus activo (puerto 502 escuchando)</li>
+            <li>Verificar que el mapeo de registros en el UR3 coincide con lo configurado en el scan list de Horner</li>
+            <li>Verificar que ningun firewall bloquea el puerto 502</li>
+            <li>El problema ya no es de red sino de protocolo/aplicacion</li>
+        </ul>
+
+        <h3>Aparece una ruta incorrecta en Windows</h3>
+        <p>Si <code>route print</code> muestra que la red <code>192.168.1.0</code> sale por la interfaz <code>192.168.3.228</code>, esa ruta esta mal. Eliminarla:</p>
+        <pre><span class="cmd">route delete 192.168.1.0</span></pre>
+        <p>La red <code>.1</code> esta conectada directamente a la PC por Ethernet y no necesita ruta indirecta.</p>
+
+        <!-- ================================================================ -->
+        <h2 id="checklist">14. Checklist Operativo</h2>
+
+        <div class="alert alert-success">
+            <strong>Seguir este checklist en orden para poner en marcha la comunicacion UR3 ↔ PLC:</strong>
+        </div>
+
+        <ol>
+            <li><span class="step-number">1</span>UR3 con IP <code>192.168.1.76</code>, mascara <code>255.255.255.0</code>, gateway <code>192.168.1.28</code></li>
+            <li><span class="step-number">2</span>PC Windows: Ethernet con <code>192.168.1.28</code> (sin gateway)</li>
+            <li><span class="step-number">3</span>PC Windows: Wi-Fi con <code>192.168.3.228</code> (gateway <code>192.168.3.1</code>)</li>
+            <li><span class="step-number">4</span><code>ping 192.168.1.76</code> desde Windows responde OK</li>
+            <li><span class="step-number">5</span>Forwarding habilitado en ambas interfaces (<code>Set-NetIPInterface</code>)</li>
+            <li><span class="step-number">6</span><code>IPEnableRouter = 1</code> en registro de Windows</li>
+            <li><span class="step-number">7</span><code>route print</code> muestra ambas redes como On-link</li>
+            <li><span class="step-number">8</span>PLC con IP <code>192.168.3.12</code>, gateway <code>192.168.3.228</code></li>
+            <li><span class="step-number">9</span>En Cscape: Modbus Client habilitado, dispositivo UR3 en <code>192.168.1.76:502</code></li>
+            <li><span class="step-number">10</span>Scan list configurado con los registros deseados</li>
+            <li><span class="step-number">11</span>Verificar valor de <code>%R00004</code> cambia al forzar desde UR3</li>
+        </ol>
+
+        <hr>
+        <p style="text-align:center; color: var(--gray); margin-top: 40px;">
+            Manual de comunicacion UR3 - Sistema SCADA Bandas Automatizadas<br>
+            Universidad Iberoamericana — Primavera 2026
+        </p>
+
+    </div>
+</body>
+</html>
