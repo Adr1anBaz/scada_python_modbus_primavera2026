@@ -446,17 +446,18 @@
         <!-- ================================================================ -->
         <h2 id="gui">6. Uso de la Interfaz Grafica (GUI)</h2>
 
-        <p>La GUI tiene 3 pestanas, una por cada PLC. Cada pestana tiene su propio boton de conexion independiente.</p>
+        <p>La GUI tiene 3 pestañas, una por cada PLC. Cada pestaña tiene su propio boton de conexion independiente.</p>
 
         <h3>Flujo general</h3>
         <ol>
             <li>Abre la GUI</li>
-            <li>Ve a la pestana del PLC que quieres controlar</li>
+            <li>Ve a la pestaña del PLC que quieres controlar</li>
             <li>Presiona <strong>CONECTAR</strong> (debe cambiar a "ONLINE" en verde)</li>
             <li>Usa los botones de control</li>
         </ol>
 
-        <h3>Pestana Entrada (HORNER_2)</h3>
+        <h3>Pestaña Entrada (HORNER_2)</h3>
+        <img src="entrada.png" alt="GUI Pestaña Entrada" style="width:100%; border:1px solid var(--border); border-radius:8px; margin:12px 0;">
         <h4>Navegacion (modos de pantalla)</h4>
         <p>Los modos se <strong>mantienen activos</strong> (hold). Al cambiar a otro modo, el anterior se libera automaticamente.</p>
         <ul>
@@ -495,7 +496,8 @@
             <li><strong>VFD:</strong> Escribir frecuencia (R498), Leer actual (R508)</li>
         </ul>
 
-        <h3>Pestana Central (HORNER_3)</h3>
+        <h3>Pestaña Central (HORNER_3)</h3>
+        <img src="central.png" alt="GUI Pestaña Central" style="width:100%; border:1px solid var(--border); border-radius:8px; margin:12px 0;">
         <h4>Navegacion</h4>
         <ul>
             <li><strong>Proceso</strong> - Pulsa T76</li>
@@ -525,7 +527,8 @@
         </ul>
         <p><small>*Nota: Las direcciones de banda estan invertidas internamente (Adelante usa la senal ATRAS y viceversa) porque los motores estan cableados al reves.</small></p>
 
-        <h3>Pestana Salida (HORNER_1)</h3>
+        <h3>Pestaña Salida (HORNER_1)</h3>
+        <img src="salida.png" alt="GUI Pestaña Salida" style="width:100%; border:1px solid var(--border); border-radius:8px; margin:12px 0;">
         <h4>Control</h4>
         <ul>
             <li><strong>Init Proceso</strong> - Escribe bit 2 de R170 (pasa Estado 0 a 1)</li>
